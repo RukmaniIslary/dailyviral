@@ -84,11 +84,11 @@ export default function PostPageClient({ post, related }: { post: Post; related:
           <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
 
             {/* Thumbnail */}
-            <div style={{ position: 'relative', aspectRatio: '16/9', background: '#000' }}>
+            <div style={{ background: '#000', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
               <img
                 src={post.thumbnailUrl}
                 alt={post.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 520, objectFit: 'contain', background: '#111' }}
                 onError={e => {
                   (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23f0f0f0' width='800' height='450'/%3E%3Ctext fill='%23999' font-family='sans-serif' font-size='20' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EImage unavailable%3C/text%3E%3C/svg%3E";
                 }}
