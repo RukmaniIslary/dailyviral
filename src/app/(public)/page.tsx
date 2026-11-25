@@ -63,8 +63,8 @@ export default async function HomePage() {
       {/* Hero Banner */}
       <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '48px 16px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e50935', padding: '6px 16px', borderRadius: 20, marginBottom: 20 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>&#128293; 18+ Adult Media Directory</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(229,9,53,0.15)', border: '1px solid rgba(229,9,53,0.3)', padding: '6px 16px', borderRadius: 20, marginBottom: 20 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>18+ Adult Media Directory</span>
           </div>
           <h1 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, color: '#fff', marginBottom: 16, lineHeight: 1.1 }}>
             Daily <span style={{ color: '#e50935' }}>Viral</span> MMS
@@ -73,11 +73,11 @@ export default async function HomePage() {
             Discover the hottest trending viral content. Updated daily with the latest MMS and media.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/trending" style={{ background: '#e50935', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, display: 'inline-block' }}>
-              &#128293; View Trending
+            <Link href="/trending" style={{ background: '#e50935', color: '#fff', padding: '12px 28px', borderRadius: 8, fontWeight: 700, fontSize: 15, display: 'inline-block' }}>
+              View Trending
             </Link>
-            <Link href="/latest" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, border: '1.5px solid rgba(255,255,255,0.2)', display: 'inline-block' }}>
-              &#128337; Latest Posts
+            <Link href="/latest" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '12px 28px', borderRadius: 8, fontWeight: 700, fontSize: 15, border: '1.5px solid rgba(255,255,255,0.2)', display: 'inline-block' }}>
+              Latest Posts
             </Link>
           </div>
         </div>

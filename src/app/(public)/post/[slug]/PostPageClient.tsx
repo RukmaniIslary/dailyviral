@@ -124,7 +124,7 @@ export default function PostPageClient({ post, related }: { post: Post; related:
                   onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(229,9,53,0.5)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(229,9,53,0.4)'; }}
                 >
-                  <span style={{ fontSize: 24 }}>&#9654;</span>
+                  <span style={{ fontSize: 20, display: 'inline-block', width: 36, height: 36, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', lineHeight: '36px', textAlign: 'center' }}>&#9654;</span>
                   {loading ? 'Loading...' : 'Watch Now'}
                 </button>
                 <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>Opens in a new tab</p>
