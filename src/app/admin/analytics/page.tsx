@@ -102,7 +102,6 @@ export default async function AdminAnalyticsPage() {
                     src={post.thumbnailUrl}
                     alt=""
                     className="w-14 h-9 rounded object-cover flex-shrink-0"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <div className="flex-1 min-w-0">
                     <Link

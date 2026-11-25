@@ -1,3 +1,5 @@
+'use client';
+
 import PostCard from './PostCard';
 
 interface Post {

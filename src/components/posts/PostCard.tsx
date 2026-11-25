@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Eye, Calendar, Tag } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
