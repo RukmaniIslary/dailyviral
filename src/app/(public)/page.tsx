@@ -33,7 +33,7 @@ export default async function HomePage() {
     <div style={{ background: '#f7f7f7', minHeight: '100vh' }}>
 
       {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #001f3f 60%, #003366 100%)', padding: '56px 20px 0', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #001f3f 60%, #003366 100%)', padding: '80px 20px', overflow: 'hidden', position: 'relative', minHeight: 380 }}>
 
         {/* Animated stripes background */}
         <HeroStripes posts={latest} />
@@ -48,23 +48,11 @@ export default async function HomePage() {
           <p style={{ fontSize: 16, color: '#94a3b8', maxWidth: 480, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Discover the hottest trending viral content. Updated daily.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 44 }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 56 }}>
             <Link href="/trending" className="btn-primary">View Trending</Link>
             <Link href="/latest" className="btn-outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Latest Posts</Link>
           </div>
         </div>
-
-        {/* Image mosaic row at bottom of hero */}
-        {latest.length > 0 && (
-          <div style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4, maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)' }}>
-            {latest.slice(0, 6).map((p) => (
-              <Link key={p.id} href={`/post/${p.slug}`} style={{ display: 'block', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '6px 6px 0 0' }}>
-                <img src={p.thumbnailUrl} alt={p.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 20px' }}>
