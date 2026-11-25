@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldAlert } from 'lucide-react';
 
 export default function AgeGate({ children }: { children: React.ReactNode }) {
-  const [confirmed, setConfirmed] = useState(true); // default true to avoid flash
+  const [confirmed, setConfirmed] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem('dvm_age_confirmed');
-    if (stored !== 'true') {
-      setConfirmed(false);
-    }
+    if (stored !== 'true') setConfirmed(false);
   }, []);
 
   function handleConfirm() {
@@ -24,55 +21,79 @@ export default function AgeGate({ children }: { children: React.ReactNode }) {
 
   if (!confirmed) {
     return (
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-        style={{ background: '#0B0B0F' }}
-      >
-        <div
-          className="max-w-md w-full rounded-2xl p-8 text-center"
-          style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-        >
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'rgba(229,9,53,0.1)' }}
-          >
-            <ShieldAlert size={32} style={{ color: '#E50935' }} />
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: '#0B0B0F',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16,
+      }}>
+        <div style={{
+          background: '#17171D',
+          border: '1px solid #2A2A35',
+          borderRadius: 20,
+          padding: '40px 32px',
+          maxWidth: 440,
+          width: '100%',
+          textAlign: 'center',
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            background: 'rgba(229,9,53,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px',
+          }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E50935" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
           </div>
 
-          <div
-            className="inline-flex items-center px-3 py-1 rounded text-sm font-black text-white mb-4"
-            style={{ background: '#E50935' }}
-          >
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: '#E50935', color: '#fff',
+            padding: '4px 14px', borderRadius: 6,
+            fontSize: 13, fontWeight: 900, letterSpacing: 1,
+            marginBottom: 18,
+          }}>
             18+ ADULTS ONLY
           </div>
 
-          <h1 className="text-2xl font-bold text-white mb-3">Age Verification Required</h1>
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 12 }}>
+            Age Verification Required
+          </h1>
+          <p style={{ fontSize: 14, color: '#9ca3af', lineHeight: 1.7, marginBottom: 28 }}>
             This website contains adult-oriented content intended only for individuals who are 18 years of age or older.
             By entering you confirm that you are of legal age in your jurisdiction.
           </p>
 
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleConfirm}
-              className="w-full py-3 rounded-xl font-bold text-white transition-all hover:opacity-90"
-              style={{ background: '#E50935' }}
-            >
+          {/* Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button onClick={handleConfirm} style={{
+              width: '100%', padding: '14px',
+              borderRadius: 12, border: 'none',
+              background: '#E50935', color: '#fff',
+              fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            }}>
               I am 18 or older – Enter
             </button>
-            <button
-              onClick={handleDecline}
-              className="w-full py-3 rounded-xl font-medium text-gray-400 hover:text-white transition-colors"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            >
+            <button onClick={handleDecline} style={{
+              width: '100%', padding: '14px',
+              borderRadius: 12, border: '1px solid #2A2A35',
+              background: '#0B0B0F', color: '#9ca3af',
+              fontSize: 15, fontWeight: 500, cursor: 'pointer',
+            }}>
               I am under 18 – Leave
             </button>
           </div>
 
-          <p className="mt-5 text-xs text-gray-600">
+          <p style={{ marginTop: 20, fontSize: 12, color: '#4b5563' }}>
             By entering you agree to our{' '}
-            <a href="/terms" className="underline hover:text-gray-400">Terms of Service</a> and{' '}
-            <a href="/privacy" className="underline hover:text-gray-400">Privacy Policy</a>.
+            <a href="/terms" style={{ textDecoration: 'underline', color: '#6b7280' }}>Terms of Service</a>
+            {' '}and{' '}
+            <a href="/privacy" style={{ textDecoration: 'underline', color: '#6b7280' }}>Privacy Policy</a>.
           </p>
         </div>
       </div>
