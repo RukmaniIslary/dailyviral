@@ -1,399 +1,231 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Image as ImageIcon, ExternalLink, Tag, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
-interface Category {
-  id: string;
-  name: string;
-}
+interface Category { id: string; name: string; }
 
 interface PostData {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  thumbnailUrl: string;
-  externalUrl: string;
-  categoryId: string;
-  isFeatured: boolean;
-  status: string;
+  id: string; title: string; slug: string; description: string | null;
+  thumbnailUrl: string; externalUrl: string; categoryId: string;
+  isFeatured: boolean; status: string;
   tags: Array<{ tag: { name: string } }>;
 }
 
-interface Props {
-  categories: Category[];
-  post?: PostData;
+function generateSlug(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim().substring(0, 100);
 }
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-    .substring(0, 100);
-}
+const inputStyle = {
+  width: '100%', padding: '11px 14px', borderRadius: 8,
+  border: '1.5px solid #e0e0e0', fontSize: 14, color: '#111',
+  background: '#fff', outline: 'none', boxSizing: 'border-box' as const,
+};
 
-export default function PostForm({ categories, post }: Props) {
+const labelStyle = { display: 'block', fontSize: 13, fontWeight: 600, color: '#333', marginBottom: 7 } as const;
+
+export default function PostForm({ categories, post }: { categories: Category[]; post?: PostData }) {
   const router = useRouter();
   const isEdit = !!post;
 
   const [title, setTitle] = useState(post?.title || '');
   const [slug, setSlug] = useState(post?.slug || '');
+  const [slugManual, setSlugManual] = useState(!!post);
   const [description, setDescription] = useState(post?.description || '');
   const [thumbnailUrl, setThumbnailUrl] = useState(post?.thumbnailUrl || '');
-  const [thumbnailPreview, setThumbnailPreview] = useState(post?.thumbnailUrl || '');
-  const [thumbnailError, setThumbnailError] = useState(false);
-  const [thumbnailLoading, setThumbnailLoading] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState(post?.thumbnailUrl || '');
+  const [previewError, setPreviewError] = useState(false);
   const [externalUrl, setExternalUrl] = useState(post?.externalUrl || '');
   const [categoryId, setCategoryId] = useState(post?.categoryId || '');
-  const [tagsInput, setTagsInput] = useState(post?.tags.map((t) => t.tag.name).join(', ') || '');
+  const [tagsInput, setTagsInput] = useState(post?.tags.map(t => t.tag.name).join(', ') || '');
   const [isFeatured, setIsFeatured] = useState(post?.isFeatured || false);
-  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>(
-    (post?.status as 'DRAFT' | 'PUBLISHED') || 'DRAFT'
-  );
+  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>((post?.status as 'DRAFT' | 'PUBLISHED') || 'DRAFT');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [slugManual, setSlugManual] = useState(!!post);
 
-  // Auto-generate slug from title
   useEffect(() => {
-    if (!slugManual && title) {
-      setSlug(generateSlug(title));
-    }
+    if (!slugManual && title) setSlug(generateSlug(title));
   }, [title, slugManual]);
 
-  // Live image preview with debounce
   useEffect(() => {
-    if (!thumbnailUrl) {
-      setThumbnailPreview('');
-      setThumbnailError(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setThumbnailLoading(true);
-      setThumbnailError(false);
-      setThumbnailPreview(thumbnailUrl);
-    }, 600);
-
-    return () => clearTimeout(timer);
+    if (!thumbnailUrl) { setPreviewSrc(''); setPreviewError(false); return; }
+    const t = setTimeout(() => { setPreviewSrc(thumbnailUrl); setPreviewError(false); }, 700);
+    return () => clearTimeout(t);
   }, [thumbnailUrl]);
 
   async function handleSubmit(submitStatus: 'DRAFT' | 'PUBLISHED') {
-    setError('');
-    setSuccess('');
-    setLoading(true);
-
-    const tags = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    const payload = {
-      title,
-      slug,
-      description,
-      thumbnailUrl,
-      externalUrl,
-      categoryId,
-      tags,
-      isFeatured,
-      status: submitStatus,
-    };
-
+    setError(''); setSuccess(''); setLoading(true);
+    const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+    const payload = { title, slug, description, thumbnailUrl, externalUrl, categoryId, tags, isFeatured, status: submitStatus };
     try {
       const url = isEdit ? `/api/admin/posts/${post!.id}` : '/api/admin/posts';
-      const method = isEdit ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
+      const res = await fetch(url, { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Failed to save post');
-      } else {
-        setSuccess(submitStatus === 'PUBLISHED' ? 'Post published!' : 'Draft saved!');
-        setTimeout(() => router.push('/admin/posts'), 1200);
-      }
-    } catch {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+      if (!res.ok) setError(data.error || 'Failed to save');
+      else { setSuccess(submitStatus === 'PUBLISHED' ? 'Post published successfully!' : 'Draft saved!'); setTimeout(() => router.push('/admin/posts'), 1000); }
+    } catch { setError('Network error. Please try again.'); }
+    finally { setLoading(false); }
   }
 
   return (
-    <div className="max-w-4xl">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main form */}
-        <div className="lg:col-span-2 space-y-5">
-          {/* Title */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
-              Post Title <span style={{ color: '#E50935' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title..."
-              className="w-full px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            />
+    <div style={{ maxWidth: 860 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20, alignItems: 'start' }}>
 
-            <label className="block text-sm font-semibold text-gray-300 mt-4 mb-2">
-              URL Slug <span style={{ color: '#E50935' }}>*</span>
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => {
-                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''));
-                  setSlugManual(true);
-                }}
-                placeholder="post-url-slug"
-                className="flex-1 px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm font-mono"
-                style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-              />
-              <button
-                type="button"
-                onClick={() => { setSlug(generateSlug(title)); setSlugManual(false); }}
-                className="px-3 py-2.5 rounded-lg text-xs text-gray-400 hover:text-white transition-colors"
-                style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-              >
-                Auto
-              </button>
+        {/* Left column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Title + Slug */}
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>Post Title <span style={{ color: '#e50935' }}>*</span></label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Enter post title..."
+                style={inputStyle} onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
+            </div>
+            <div>
+              <label style={labelStyle}>URL Slug <span style={{ color: '#e50935' }}>*</span></label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type="text" value={slug} onChange={e => { setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setSlugManual(true); }}
+                  placeholder="post-url-slug" style={{ ...inputStyle, flex: 1, fontFamily: 'monospace', fontSize: 13 }}
+                  onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
+                <button type="button" onClick={() => { setSlug(generateSlug(title)); setSlugManual(false); }}
+                  style={{ padding: '11px 16px', borderRadius: 8, border: '1.5px solid #e0e0e0', background: '#f7f7f7', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  Auto
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Description */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              maxLength={2000}
-              placeholder="Optional description..."
-              className="w-full px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm resize-none"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            />
-            <p className="text-xs text-gray-600 mt-1 text-right">{description.length}/2000</p>
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <label style={labelStyle}>Description</label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={4} maxLength={2000}
+              placeholder="Optional description of the post..."
+              style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+              onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
+            <p style={{ fontSize: 11, color: '#ccc', textAlign: 'right', marginTop: 4 }}>{description.length} / 2000</p>
           </div>
 
           {/* Thumbnail URL */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-              <ImageIcon size={15} style={{ color: '#E50935' }} />
-              Thumbnail Image URL <span style={{ color: '#E50935' }}>*</span>
-            </label>
-            <input
-              type="url"
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <label style={labelStyle}>Thumbnail Image URL <span style={{ color: '#e50935' }}>*</span></label>
+            <input type="url" value={thumbnailUrl} onChange={e => setThumbnailUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
-              className="w-full px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm font-mono"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            />
-            <p className="text-xs text-gray-600 mt-1">
-              Paste a direct link to the image. Supports JPG, PNG, WebP, GIF.
-            </p>
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }}
+              onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
+            <p style={{ fontSize: 12, color: '#aaa', marginTop: 6 }}>Paste a direct link to any JPG, PNG, WebP or GIF image.</p>
 
             {/* Live preview */}
-            {thumbnailPreview && (
-              <div className="mt-3">
-                <p className="text-xs text-gray-500 mb-2">Preview:</p>
-                <div
-                  className="relative rounded-xl overflow-hidden aspect-video max-w-sm"
-                  style={{ background: '#0B0B0F' }}
-                >
-                  {thumbnailLoading && !thumbnailError && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Loader2 size={20} className="text-gray-500 animate-spin" />
-                    </div>
-                  )}
-                  <img
-                    src={thumbnailPreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onLoad={() => { setThumbnailLoading(false); setThumbnailError(false); }}
-                    onError={() => { setThumbnailLoading(false); setThumbnailError(true); }}
-                    style={{ display: thumbnailError ? 'none' : 'block' }}
-                  />
-                  {thumbnailError && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                      <AlertCircle size={20} style={{ color: '#E50935' }} />
-                      <p className="text-xs text-gray-500">Could not load image</p>
+            {previewSrc && (
+              <div style={{ marginTop: 16 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 8 }}>Image Preview</p>
+                <div style={{ position: 'relative', aspectRatio: '16/9', background: '#f5f5f5', borderRadius: 8, overflow: 'hidden', maxWidth: 360 }}>
+                  {!previewError ? (
+                    <img src={previewSrc} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onLoad={() => setPreviewError(false)} onError={() => setPreviewError(true)} />
+                  ) : (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#fff0f3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ color: '#e50935', fontSize: 18, fontWeight: 900 }}>!</span>
+                      </div>
+                      <p style={{ fontSize: 12, color: '#e50935', fontWeight: 600 }}>Could not load image</p>
                     </div>
                   )}
                 </div>
-                {!thumbnailError && !thumbnailLoading && (
-                  <div className="flex items-center gap-1 mt-1 text-xs" style={{ color: '#10B981' }}>
-                    <CheckCircle size={12} /> Image loaded successfully
-                  </div>
+                {!previewError && (
+                  <p style={{ fontSize: 11, color: '#10b981', marginTop: 6, fontWeight: 600 }}>Image loaded successfully</p>
                 )}
               </div>
             )}
           </div>
 
           {/* External URL */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-              <ExternalLink size={15} style={{ color: '#E50935' }} />
-              External Content URL <span style={{ color: '#E50935' }}>*</span>
-            </label>
-            <input
-              type="url"
-              value={externalUrl}
-              onChange={(e) => setExternalUrl(e.target.value)}
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <label style={labelStyle}>External Content URL <span style={{ color: '#e50935' }}>*</span></label>
+            <input type="url" value={externalUrl} onChange={e => setExternalUrl(e.target.value)}
               placeholder="https://example.com/content"
-              className="w-full px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm font-mono"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            />
-            <p className="text-xs text-gray-600 mt-1">Must be HTTPS. Visitors will be redirected here.</p>
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }}
+              onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
+            <p style={{ fontSize: 12, color: '#aaa', marginTop: 6 }}>Must be HTTPS. Visitors will be sent to this URL when they click Watch Now.</p>
           </div>
 
           {/* Tags */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-              <Tag size={15} style={{ color: '#E50935' }} />
-              Tags
-            </label>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="viral, trending, mms (comma-separated)"
-              className="w-full px-3 py-2.5 rounded-lg text-white placeholder-gray-600 outline-none text-sm"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            />
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <label style={labelStyle}>Tags</label>
+            <input type="text" value={tagsInput} onChange={e => setTagsInput(e.target.value)}
+              placeholder="viral, trending, mms (comma separated)"
+              style={inputStyle} onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
           </div>
         </div>
 
-        {/* Sidebar options */}
-        <div className="space-y-5">
+        {/* Right column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
           {/* Category */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
-              Category <span style={{ color: '#E50935' }}>*</span>
-            </label>
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 20 }}>
+            <label style={labelStyle}>Category <span style={{ color: '#e50935' }}>*</span></label>
             {categories.length === 0 ? (
-              <div className="p-3 rounded-lg text-sm text-gray-500" style={{ background: '#0B0B0F' }}>
-                No categories yet.{' '}
-                <a href="/admin/categories" className="underline" style={{ color: '#E50935' }}>
-                  Create one
-                </a>
+              <div style={{ padding: '10px 14px', background: '#f7f7f7', borderRadius: 8, fontSize: 13, color: '#999' }}>
+                No categories yet. <a href="/admin/categories" style={{ color: '#00aff0', fontWeight: 600 }}>Create one</a>
               </div>
             ) : (
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg text-white outline-none text-sm"
-                style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-              >
+              <select value={categoryId} onChange={e => setCategoryId(e.target.value)}
+                style={{ ...inputStyle, cursor: 'pointer' }}
+                onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')}>
                 <option value="">Select category...</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             )}
           </div>
 
           {/* Options */}
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <h3 className="text-sm font-semibold text-gray-300 mb-4">Options</h3>
-
-            <label className="flex items-center gap-3 cursor-pointer mb-3">
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 20 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 14 }}>Options</p>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
               <div
-                className="relative w-10 h-6 rounded-full transition-colors"
-                style={{ background: isFeatured ? '#E50935' : '#2A2A35' }}
                 onClick={() => setIsFeatured(!isFeatured)}
-              >
-                <div
-                  className="absolute top-1 w-4 h-4 rounded-full bg-white transition-transform"
-                  style={{ transform: isFeatured ? 'translateX(20px)' : 'translateX(4px)' }}
-                />
+                style={{ width: 44, height: 24, borderRadius: 12, background: isFeatured ? '#00aff0' : '#e0e0e0', position: 'relative', transition: 'background .2s', cursor: 'pointer', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 3, left: isFeatured ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
-              <span className="text-sm text-gray-300">Featured Post</span>
+              <span style={{ fontSize: 14, color: '#333', fontWeight: 500 }}>Featured Post</span>
             </label>
           </div>
 
           {/* Error / Success */}
           {error && (
-            <div className="rounded-xl p-4 flex items-start gap-2" style={{ background: 'rgba(229,9,53,0.1)', border: '1px solid rgba(229,9,53,0.3)' }}>
-              <AlertCircle size={16} style={{ color: '#E50935', flexShrink: 0, marginTop: 1 }} />
-              <p className="text-sm text-red-400">{error}</p>
+            <div style={{ background: '#fff0f3', border: '1px solid #fecdd3', borderRadius: 10, padding: '12px 16px' }}>
+              <p style={{ fontSize: 13, color: '#e50935', fontWeight: 500 }}>{error}</p>
             </div>
           )}
-
           {success && (
-            <div className="rounded-xl p-4 flex items-start gap-2" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
-              <CheckCircle size={16} style={{ color: '#10B981', flexShrink: 0, marginTop: 1 }} />
-              <p className="text-sm text-green-400">{success}</p>
+            <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 10, padding: '12px 16px' }}>
+              <p style={{ fontSize: 13, color: '#10b981', fontWeight: 600 }}>{success}</p>
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={() => handleSubmit('PUBLISHED')}
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: '#E50935' }}
-            >
+          {/* Actions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button onClick={() => handleSubmit('PUBLISHED')} disabled={loading}
+              style={{ width: '100%', padding: '13px', borderRadius: 10, background: '#00aff0', color: '#fff', fontSize: 15, fontWeight: 700, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, boxShadow: '0 2px 10px rgba(0,175,240,0.3)' }}>
               {loading ? 'Saving...' : 'Publish Now'}
             </button>
-            <button
-              onClick={() => handleSubmit('DRAFT')}
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-medium text-gray-300 text-sm transition-colors hover:text-white"
-              style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-            >
+            <button onClick={() => handleSubmit('DRAFT')} disabled={loading}
+              style={{ width: '100%', padding: '12px', borderRadius: 10, background: '#fff', color: '#555', fontSize: 14, fontWeight: 600, border: '1.5px solid #e0e0e0', cursor: loading ? 'not-allowed' : 'pointer' }}>
               Save as Draft
             </button>
-            <button
-              type="button"
-              onClick={() => router.push('/admin/posts')}
-              className="w-full py-2 text-sm text-gray-600 hover:text-gray-400 transition-colors"
-            >
+            <button type="button" onClick={() => router.push('/admin/posts')}
+              style={{ width: '100%', padding: '10px', borderRadius: 10, background: 'none', color: '#aaa', fontSize: 13, border: 'none', cursor: 'pointer' }}>
               Cancel
             </button>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .post-form-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
