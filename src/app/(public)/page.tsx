@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import PostGrid from '@/components/posts/PostGrid';
+import HeroStripes from '@/components/ui/HeroStripes';
 import Link from 'next/link';
 
 export const revalidate = 60;
@@ -34,16 +35,8 @@ export default async function HomePage() {
       {/* Hero */}
       <div style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #001f3f 60%, #003366 100%)', padding: '56px 20px 0', overflow: 'hidden', position: 'relative' }}>
 
-        {/* Faded image strip behind hero text */}
-        {latest.length > 0 && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 6, opacity: 0.18, pointerEvents: 'none', overflow: 'hidden' }}>
-            {[...latest, ...latest].map((p, i) => (
-              <div key={i} style={{ flexShrink: 0, width: 140, height: '100%', position: 'relative' }}>
-                <img src={p.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Animated stripes background */}
+        <HeroStripes posts={latest} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <span style={{ display: 'inline-block', background: 'rgba(0,175,240,0.15)', border: '1px solid rgba(0,175,240,0.4)', color: '#00aff0', fontSize: 12, fontWeight: 700, padding: '5px 18px', borderRadius: 25, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 }}>
