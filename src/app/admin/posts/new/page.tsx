@@ -7,7 +7,7 @@ import PostForm from '@/components/admin/PostForm';
 export default async function NewPostPage() {
   const session = await getSession();
   if (!session) redirect('/admin/login');
-  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+  const categories = await prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }] });
 
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
@@ -20,3 +20,4 @@ export default async function NewPostPage() {
     </div>
   );
 }
+

@@ -19,7 +19,7 @@ export default async function EditPostPage({ params }: Props) {
       where: { id },
       include: { tags: { include: { tag: true } } },
     }),
-    prisma.category.findMany({ orderBy: { name: 'asc' } }),
+    prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }] }),
   ]);
 
   if (!post) notFound();

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
     include: { _count: { select: { posts: true } } },
   });
 
@@ -42,3 +42,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ category }, { status: 201 });
 }
+

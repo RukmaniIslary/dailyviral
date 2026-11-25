@@ -7,7 +7,7 @@ import CategoriesClient from './CategoriesClient';
 export default async function AdminCategoriesPage() {
   const session = await getSession();
   if (!session) redirect('/admin/login');
-  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' }, include: { _count: { select: { posts: true } } } });
+  const categories = await prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }], include: { _count: { select: { posts: true } } } });
 
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
@@ -19,3 +19,4 @@ export default async function AdminCategoriesPage() {
     </div>
   );
 }
+

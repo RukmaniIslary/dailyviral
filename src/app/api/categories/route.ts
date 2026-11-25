@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db/prisma';
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
       include: {
         _count: {
           select: { posts: { where: { status: 'PUBLISHED' } } },
@@ -16,3 +16,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
   }
 }
+

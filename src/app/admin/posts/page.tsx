@@ -24,7 +24,7 @@ export default async function AdminPostsPage({ searchParams }: Props) {
   const [posts, total, categories] = await Promise.all([
     prisma.post.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE, include: { category: { select: { name: true } } } }),
     prisma.post.count({ where }),
-    prisma.category.findMany({ orderBy: { name: 'asc' } }),
+    prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }] }),
   ]);
 
   return (
@@ -37,3 +37,4 @@ export default async function AdminPostsPage({ searchParams }: Props) {
     </div>
   );
 }
+

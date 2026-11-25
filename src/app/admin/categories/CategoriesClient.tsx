@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-interface Category { id: string; name: string; slug: string; description: string | null; imageUrl: string | null; _count: { posts: number }; }
+interface Category { id: string; name: string; slug: string; description: string | null; imageUrl: string | null; order: number; _count: { posts: number }; }
 
 function generateSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
@@ -14,12 +14,12 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
   const [categories, setCategories] = useState(initialCategories);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', imageUrl: '' });
+  const [form, setForm] = useState({ name: '', slug: '', description: '', imageUrl: '', order: '0' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function openCreate() { setEditId(null); setForm({ name: '', slug: '', description: '', imageUrl: '' }); setError(''); setShowForm(true); }
-  function openEdit(c: Category) { setEditId(c.id); setForm({ name: c.name, slug: c.slug, description: c.description || '', imageUrl: c.imageUrl || '' }); setError(''); setShowForm(true); }
+  function openCreate() { setEditId(null); setForm({ name: '', slug: '', description: '', imageUrl: '', order: '0' }); setError(''); setShowForm(true); }
+  function openEdit(c: Category) { setEditId(c.id); setForm({ name: c.name, slug: c.slug, description: c.description || '', imageUrl: c.imageUrl || '', order: String(c.order) }); setError(''); setShowForm(true); }
 
   async function handleSave() {
     if (!form.name.trim()) { setError('Name is required'); return; }
@@ -70,11 +70,12 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
               { label: 'Slug *', key: 'slug', placeholder: 'onlyfans-videos', mono: true },
               { label: 'Description', key: 'description', placeholder: 'Optional short description' },
               { label: 'Cover Image URL', key: 'imageUrl', placeholder: 'https://example.com/cover.jpg' },
+              { label: 'Display Order', key: 'order', placeholder: '0 = first, 1 = second…', type: 'number' },
             ].map(f => (
               <div key={f.key}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#333', marginBottom: 6 }}>{f.label}</label>
                 <input
-                  type="text"
+                  type={f.type || 'text'}
                   value={form[f.key as keyof typeof form]}
                   onChange={e => {
                     const val = e.target.value;
@@ -124,7 +125,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
         ) : (
           <table className="admin-table">
             <thead>
-              <tr>{['Cover', 'Name', 'Slug', 'Description', 'Posts', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{['Cover', 'Order', 'Name', 'Slug', 'Description', 'Posts', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {categories.map(cat => (
@@ -137,6 +138,7 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
                       }
                     </div>
                   </td>
+                  <td><span style={{ fontWeight: 700, color: '#00aff0', fontSize: 13 }}>{cat.order}</span></td>
                   <td style={{ fontWeight: 600, color: '#111' }}>{cat.name}</td>
                   <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{cat.slug}</td>
                   <td style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.description || '—'}</td>

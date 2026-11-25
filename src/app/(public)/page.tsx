@@ -13,7 +13,7 @@ async function getData() {
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { clicks: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED', isFeatured: true }, orderBy: { publishedAt: 'desc' }, take: 6, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { views: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
-    prisma.category.findMany({ orderBy: { name: 'asc' }, include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } } }),
+    prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }], include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } } }),
   ]);
   return { latest, trending, featured, mostViewed, categories };
 }
@@ -111,3 +111,4 @@ export default async function HomePage() {
     </div>
   );
 }
+

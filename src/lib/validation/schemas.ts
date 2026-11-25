@@ -56,6 +56,7 @@ export const categorySchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase letters, numbers and hyphens'),
   description: z.string().max(500).optional(),
   imageUrl: z.string().url().optional().or(z.literal('')),
+  order: z.coerce.number().int().optional().default(0),
 });
 
 export const reportSchema = z.object({
