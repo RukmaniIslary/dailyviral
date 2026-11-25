@@ -2,127 +2,81 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Flag, ExternalLink } from 'lucide-react';
 import { formatDate } from '@/lib/utils/date';
 
 interface Report {
-  id: string;
-  reason: string;
-  description: string | null;
-  status: string;
-  createdAt: string;
+  id: string; reason: string; description: string | null; status: string; createdAt: string;
   post: { title: string; slug: string; thumbnailUrl: string };
 }
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B' },
-  REVIEWED: { bg: 'rgba(99,102,241,0.1)', color: '#6366F1' },
-  RESOLVED: { bg: 'rgba(16,185,129,0.1)', color: '#10B981' },
-  DISMISSED: { bg: 'rgba(107,114,128,0.1)', color: '#6B7280' },
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  PENDING: { bg: '#fff8e6', color: '#f59e0b' },
+  REVIEWED: { bg: '#eef2ff', color: '#6366f1' },
+  RESOLVED: { bg: '#ecfdf5', color: '#10b981' },
+  DISMISSED: { bg: '#f5f5f5', color: '#999' },
 };
 
-export default function ReportsClient({
-  initialReports,
-  total,
-  page,
-  pageSize,
-}: {
-  initialReports: Report[];
-  total: number;
-  page: number;
-  pageSize: number;
-}) {
+export default function ReportsClient({ initialReports, total, page, pageSize }: { initialReports: Report[]; total: number; page: number; pageSize: number; }) {
   const [reports, setReports] = useState(initialReports);
-  const totalPages = Math.ceil(total / pageSize);
 
   async function updateStatus(id: string, status: string) {
     try {
-      const res = await fetch(`/api/admin/reports/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-      }
+      const res = await fetch(`/api/admin/reports/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+      if (res.ok) setReports(prev => prev.map(r => r.id === id ? { ...r, status } : r));
     } catch {}
   }
 
   return (
-    <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-white">Reports</h1>
-        <p className="text-gray-500 text-sm">{total.toLocaleString()} total reports</p>
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111', marginBottom: 2 }}>Reports</h1>
+        <p style={{ fontSize: 13, color: '#999' }}>{total.toLocaleString()} total reports</p>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
+      <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, overflow: 'hidden' }}>
         {reports.length === 0 ? (
-          <div className="py-16 text-center">
-            <Flag size={32} className="text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-500">No reports found.</p>
+          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+            <p style={{ color: '#999' }}>No reports found.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="admin-table">
               <thead>
-                <tr style={{ borderBottom: '1px solid #2A2A35' }}>
-                  {['Post', 'Reason', 'Details', 'Status', 'Date', 'Actions'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
+                <tr>{['Post', 'Reason', 'Details', 'Status', 'Date', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr>
               </thead>
               <tbody>
-                {reports.map((report) => {
-                  const sc = STATUS_COLORS[report.status] || STATUS_COLORS.PENDING;
+                {reports.map(report => {
+                  const sc = STATUS_STYLE[report.status] || STATUS_STYLE.PENDING;
                   return (
-                    <tr
-                      key={report.id}
-                      className="hover:bg-white/5 transition-colors"
-                      style={{ borderBottom: '1px solid #1E1E26' }}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={report.post.thumbnailUrl}
-                            alt=""
-                            className="w-10 h-7 rounded object-cover flex-shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                          <span className="text-white text-xs line-clamp-1 max-w-32">{report.post.title}</span>
+                    <tr key={report.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 48, height: 32, borderRadius: 6, background: '#f5f5f5', flexShrink: 0, overflow: 'hidden' }}>
+                            <img src={report.post.thumbnailUrl} alt=""
+                              style={{ width: 48, height: 32, objectFit: 'cover', display: 'block' }}
+                              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#111', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                            {report.post.title}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-300">{report.reason.replace(/_/g, ' ')}</span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs max-w-40 truncate">
-                        {report.description || '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="px-2 py-1 rounded text-xs font-medium"
-                          style={{ background: sc.bg, color: sc.color }}
-                        >
+                      <td style={{ fontSize: 12 }}>{report.reason.replace(/_/g, ' ')}</td>
+                      <td style={{ fontSize: 12, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{report.description || '—'}</td>
+                      <td>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 25, background: sc.bg, color: sc.color }}>
                           {report.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(report.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <Link
-                            href={`/post/${report.post.slug}`}
-                            target="_blank"
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors"
-                          >
-                            <ExternalLink size={13} />
+                      <td style={{ fontSize: 12, color: '#aaa' }}>{formatDate(report.createdAt)}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <Link href={`/post/${report.post.slug}`} target="_blank"
+                            style={{ padding: '5px 10px', borderRadius: 6, border: '1.5px solid #e0e0e0', fontSize: 12, fontWeight: 600, color: '#00aff0' }}>
+                            View
                           </Link>
-                          <select
-                            value={report.status}
-                            onChange={(e) => updateStatus(report.id, e.target.value)}
-                            className="text-xs rounded-lg px-2 py-1.5 outline-none"
-                            style={{ background: '#0B0B0F', border: '1px solid #2A2A35', color: '#9CA3AF' }}
-                          >
+                          <select value={report.status} onChange={e => updateStatus(report.id, e.target.value)}
+                            style={{ padding: '5px 10px', borderRadius: 6, border: '1.5px solid #e0e0e0', fontSize: 12, color: '#555', background: '#fff', cursor: 'pointer', outline: 'none' }}>
                             <option value="PENDING">Pending</option>
                             <option value="REVIEWED">Reviewed</option>
                             <option value="RESOLVED">Resolved</option>
@@ -138,6 +92,6 @@ export default function ReportsClient({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

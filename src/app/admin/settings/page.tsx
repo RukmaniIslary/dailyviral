@@ -1,65 +1,51 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/session';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { Settings } from 'lucide-react';
 
 export default async function AdminSettingsPage() {
   const session = await getSession();
   if (!session) redirect('/admin/login');
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B0B0F' }}>
+    <div style={{ background: '#f7f7f7', minHeight: '100vh' }}>
       <AdminSidebar />
-      <main className="md:ml-56 pt-14 md:pt-0 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black text-white">Settings</h1>
-          <p className="text-gray-500 text-sm">Signed in as {session.email}</p>
+      <main style={{ marginLeft: 220, padding: '32px 28px' }} className="admin-main">
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111', marginBottom: 2 }}>Settings</h1>
+          <p style={{ fontSize: 13, color: '#999' }}>Signed in as {session.email}</p>
         </div>
 
-        <div className="max-w-xl space-y-5">
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <h2 className="font-semibold text-white mb-3 flex items-center gap-2">
-              <Settings size={16} style={{ color: '#E50935' }} />
-              Account Information
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-2 border-b" style={{ borderColor: '#2A2A35' }}>
-                <span className="text-gray-500">Email</span>
-                <span className="text-white">{session.email}</span>
+        <div style={{ maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 16 }}>Account Information</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #f5f5f5' }}>
+                <span style={{ fontSize: 13, color: '#999' }}>Email</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{session.email}</span>
               </div>
-              <div className="flex justify-between py-2">
-                <span className="text-gray-500">Role</span>
-                <span
-                  className="px-2 py-0.5 rounded text-xs font-bold"
-                  style={{ background: 'rgba(229,9,53,0.1)', color: '#E50935' }}
-                >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 13, color: '#999' }}>Role</span>
+                <span style={{ fontSize: 11, fontWeight: 700, background: '#e6f7fe', color: '#00aff0', padding: '3px 10px', borderRadius: 25 }}>
                   Administrator
                 </span>
               </div>
             </div>
           </div>
 
-          <div
-            className="rounded-xl p-5"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <h2 className="font-semibold text-white mb-3">Site Information</h2>
-            <div className="space-y-3 text-sm text-gray-400">
-              <p>To change your password, re-seed the database with the updated credentials using the seed script.</p>
-              <code
-                className="block p-3 rounded-lg text-xs font-mono"
-                style={{ background: '#0B0B0F', border: '1px solid #2A2A35' }}
-              >
-                npm run db:seed
-              </code>
-              <p>Environment variables are managed in the <code>.env</code> file.</p>
-            </div>
+          <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 12 }}>Change Password</h2>
+            <p style={{ fontSize: 13, color: '#999', lineHeight: 1.6, marginBottom: 12 }}>
+              To change your password, re-run the seed script with your new credentials:
+            </p>
+            <code style={{ display: 'block', background: '#f7f7f7', border: '1px solid #e8e8e8', borderRadius: 8, padding: '12px 16px', fontSize: 12, color: '#333', fontFamily: 'monospace', lineHeight: 1.6 }}>
+              SEED_ADMIN_EMAIL=you@example.com<br />
+              SEED_ADMIN_PASSWORD=NewPassword123<br />
+              npx ts-node --project tsconfig.seed.json prisma/seed.ts
+            </code>
           </div>
         </div>
       </main>
+      <style>{`@media (max-width: 768px) { .admin-main { margin-left: 0 !important; padding-top: 72px !important; } }`}</style>
     </div>
   );
 }
