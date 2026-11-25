@@ -1,7 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
 import PostGrid from '@/components/posts/PostGrid';
-import SectionHeader from '@/components/ui/SectionHeader';
-import { TrendingUp, Clock, Star, Flame, Grid3X3 } from 'lucide-react';
 import Link from 'next/link';
 
 export const revalidate = 60;
@@ -35,134 +33,125 @@ async function getHomepageData() {
     }),
     prisma.category.findMany({
       orderBy: { name: 'asc' },
-      include: {
-        _count: { select: { posts: { where: { status: 'PUBLISHED' } } } },
-      },
+      include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } },
     }),
   ]);
-
   return { latest, trending, featured, mostViewed, categories };
+}
+
+function SectionTitle({ title, href }: { title: string; href?: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 4, height: 24, background: '#e50935', borderRadius: 2 }} />
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1a1a2e' }}>{title}</h2>
+      </div>
+      {href && (
+        <Link href={href} style={{ fontSize: 13, fontWeight: 700, color: '#e50935', padding: '6px 16px', border: '1.5px solid #e50935', borderRadius: 20, transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e50935'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#e50935'; }}>
+          View All
+        </Link>
+      )}
+    </div>
+  );
 }
 
 export default async function HomePage() {
   const { latest, trending, featured, mostViewed, categories } = await getHomepageData();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Hero */}
-      <div
-        className="relative overflow-hidden rounded-2xl mb-10 p-8 md:p-12"
-        style={{
-          background: 'linear-gradient(135deg, #17171D 0%, #1a0812 50%, #17171D 100%)',
-          border: '1px solid #2A2A35',
-        }}
-      >
-        <div
-          className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20"
-          style={{ background: '#E50935' }}
-        />
-        <div className="relative z-10">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-white mb-4"
-            style={{ background: 'rgba(229,9,53,0.2)', border: '1px solid rgba(229,9,53,0.3)' }}
-          >
-            <Flame size={12} style={{ color: '#E50935' }} />
-            18+ Adult Media Directory
+    <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+      {/* Hero Banner */}
+      <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '48px 16px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e50935', padding: '6px 16px', borderRadius: 20, marginBottom: 20 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>&#128293; 18+ Adult Media Directory</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-3">
-            Daily <span style={{ color: '#E50935' }}>Viral</span> MMS
+          <h1 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, color: '#fff', marginBottom: 16, lineHeight: 1.1 }}>
+            Daily <span style={{ color: '#e50935' }}>Viral</span> MMS
           </h1>
-          <p className="text-gray-400 text-base md:text-lg max-w-xl">
+          <p style={{ fontSize: 16, color: '#94a3b8', maxWidth: 500, margin: '0 auto 28px', lineHeight: 1.6 }}>
             Discover the hottest trending viral content. Updated daily with the latest MMS and media.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/trending"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:opacity-90"
-              style={{ background: '#E50935' }}
-            >
-              <TrendingUp size={16} /> View Trending
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/trending" style={{ background: '#e50935', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, display: 'inline-block', transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+              &#128293; View Trending
             </Link>
-            <Link
-              href="/latest"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all hover:bg-white/10"
-              style={{ border: '1px solid #2A2A35', color: '#9CA3AF' }}
-            >
-              <Clock size={16} /> Latest Posts
+            <Link href="/latest" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, border: '1.5px solid rgba(255,255,255,0.2)', display: 'inline-block' }}>
+              &#128337; Latest Posts
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Categories */}
-      {categories.length > 0 && (
-        <div className="mb-10">
-          <SectionHeader title="Browse Categories" icon={<Grid3X3 size={16} />} />
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/category/${cat.slug}`}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5"
-                style={{ background: '#17171D', border: '1px solid #2A2A35', color: '#9CA3AF' }}
-              >
-                {cat.name}
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded font-bold"
-                  style={{ background: '#E50935', color: '#fff' }}
-                >
-                  {cat._count.posts}
-                </span>
-              </Link>
-            ))}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 16px' }}>
+
+        {/* Categories */}
+        {categories.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <SectionTitle title="Browse Categories" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {categories.map(cat => (
+                <Link key={cat.id} href={`/category/${cat.slug}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 24, background: '#fff', border: '1.5px solid #eee', fontSize: 14, fontWeight: 600, color: '#1a1a2e', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#e50935'; e.currentTarget.style.color = '#e50935'; e.currentTarget.style.background = '#fff0f3'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#eee'; e.currentTarget.style.color = '#1a1a2e'; e.currentTarget.style.background = '#fff'; }}>
+                  {cat.name}
+                  <span style={{ background: '#e50935', color: '#fff', fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 12 }}>
+                    {cat._count.posts}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Featured */}
-      {featured.length > 0 && (
-        <div className="mb-10">
-          <SectionHeader title="Featured Posts" icon={<Star size={16} />} viewAllHref="/latest?featured=true" />
-          <PostGrid posts={featured} columns={3} />
-        </div>
-      )}
-
-      {/* Latest */}
-      {latest.length > 0 && (
-        <div className="mb-10">
-          <SectionHeader title="Latest Posts" icon={<Clock size={16} />} viewAllHref="/latest" />
-          <PostGrid posts={latest} columns={4} />
-        </div>
-      )}
-
-      {/* Trending */}
-      {trending.length > 0 && (
-        <div className="mb-10">
-          <SectionHeader title="Trending Now" icon={<TrendingUp size={16} />} viewAllHref="/trending" />
-          <PostGrid posts={trending} columns={4} />
-        </div>
-      )}
-
-      {/* Most Viewed */}
-      {mostViewed.length > 0 && (
-        <div className="mb-10">
-          <SectionHeader title="Most Viewed" icon={<Flame size={16} />} />
-          <PostGrid posts={mostViewed} columns={4} />
-        </div>
-      )}
-
-      {latest.length === 0 && trending.length === 0 && (
-        <div className="py-20 text-center">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: '#17171D' }}
-          >
-            <Flame size={32} className="text-gray-600" />
+        {/* Featured */}
+        {featured.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <SectionTitle title="Featured Posts" href="/latest?featured=true" />
+            <PostGrid posts={JSON.parse(JSON.stringify(featured))} columns={3} />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">No Content Yet</h2>
-          <p className="text-gray-500">Check back soon for fresh viral content.</p>
-        </div>
-      )}
+        )}
+
+        {/* Latest */}
+        {latest.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <SectionTitle title="Latest Posts" href="/latest" />
+            <PostGrid posts={JSON.parse(JSON.stringify(latest))} columns={4} />
+          </div>
+        )}
+
+        {/* Trending */}
+        {trending.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <SectionTitle title="Trending Now" href="/trending" />
+            <PostGrid posts={JSON.parse(JSON.stringify(trending))} columns={4} />
+          </div>
+        )}
+
+        {/* Most Viewed */}
+        {mostViewed.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <SectionTitle title="Most Viewed" />
+            <PostGrid posts={JSON.parse(JSON.stringify(mostViewed))} columns={4} />
+          </div>
+        )}
+
+        {latest.length === 0 && trending.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>&#127916;</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a2e', marginBottom: 8 }}>No Content Yet</h2>
+            <p style={{ color: '#999', marginBottom: 24 }}>Check back soon for fresh viral content.</p>
+            <Link href="/admin/login" style={{ background: '#e50935', color: '#fff', padding: '10px 24px', borderRadius: 24, fontWeight: 700, fontSize: 14 }}>
+              Admin Login
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

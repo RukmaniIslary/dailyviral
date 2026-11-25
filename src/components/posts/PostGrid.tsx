@@ -14,31 +14,27 @@ interface Post {
   category: { name: string; slug: string };
 }
 
-interface PostGridProps {
-  posts: Post[];
-  columns?: 2 | 3 | 4;
-}
-
-export default function PostGrid({ posts, columns = 3 }: PostGridProps) {
+export default function PostGrid({ posts, columns = 3 }: { posts: Post[]; columns?: 2 | 3 | 4 }) {
   if (posts.length === 0) {
-    return (
-      <div className="py-16 text-center">
-        <p className="text-gray-500">No posts found.</p>
-      </div>
-    );
+    return <div style={{ padding: '40px 0', textAlign: 'center', color: '#999' }}>No posts found.</div>;
   }
 
-  const gridCols = {
-    2: 'grid-cols-1 sm:grid-cols-2',
-    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-  }[columns];
+  const colMap = { 2: 'repeat(2, 1fr)', 3: 'repeat(3, 1fr)', 4: 'repeat(4, 1fr)' };
 
   return (
-    <div className={`grid ${gridCols} gap-4`}>
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
+    <div style={{ display: 'grid', gridTemplateColumns: colMap[columns], gap: 16 }}>
+      <style>{`
+        @media (max-width: 1024px) {
+          .post-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        @media (max-width: 768px) {
+          .post-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 480px) {
+          .post-grid { grid-template-columns: repeat(1, 1fr) !important; }
+        }
+      `}</style>
+      {posts.map(post => <PostCard key={post.id} post={post} />)}
     </div>
   );
 }

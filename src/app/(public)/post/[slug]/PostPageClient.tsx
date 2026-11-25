@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Calendar, Tag, ExternalLink, Flag, Share2, ChevronRight } from 'lucide-react';
 import PostGrid from '@/components/posts/PostGrid';
-import SectionHeader from '@/components/ui/SectionHeader';
 import { formatDate } from '@/lib/utils/date';
 import ReportModal from '@/components/posts/ReportModal';
 
@@ -36,17 +34,11 @@ interface RelatedPost {
   category: { name: string; slug: string };
 }
 
-interface Props {
-  post: Post;
-  related: RelatedPost[];
-}
-
-export default function PostPageClient({ post, related }: Props) {
+export default function PostPageClient({ post, related }: { post: Post; related: RelatedPost[] }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Record view
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -63,8 +55,7 @@ export default function PostPageClient({ post, related }: Props) {
         body: JSON.stringify({ type: 'click', postId: post.id }),
       });
       const data = await res.json();
-      const url = data.redirectUrl || post.externalUrl;
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(data.redirectUrl || post.externalUrl, '_blank', 'noopener,noreferrer');
     } catch {
       window.open(post.externalUrl, '_blank', 'noopener,noreferrer');
     } finally {
@@ -72,177 +63,133 @@ export default function PostPageClient({ post, related }: Props) {
     }
   }
 
-  function handleShare() {
-    if (navigator.share) {
-      navigator.share({ title: post.title, url: window.location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href).catch(() => {});
-    }
-  }
-
   const date = post.publishedAt || post.createdAt;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
-        <Link href="/" className="hover:text-white transition-colors">Home</Link>
-        <ChevronRight size={14} />
-        <Link href={`/category/${post.category.slug}`} className="hover:text-white transition-colors">
-          {post.category.name}
-        </Link>
-        <ChevronRight size={14} />
-        <span className="text-gray-400 truncate max-w-xs">{post.title}</span>
-      </nav>
+    <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 16px' }}>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main content */}
-        <div className="lg:col-span-2">
-          {/* Thumbnail */}
-          <div className="rounded-2xl overflow-hidden aspect-video mb-6" style={{ background: '#17171D' }}>
-            <img
-              src={post.thumbnailUrl}
-              alt={post.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect fill='%2317171D' width='800' height='450'/%3E%3Ctext fill='%23374151' font-family='sans-serif' font-size='20' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EImage unavailable%3C/text%3E%3C/svg%3E";
-              }}
-            />
-          </div>
-
-          {/* Title and meta */}
-          <h1 className="text-2xl md:text-3xl font-black text-white mb-4">{post.title}</h1>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6">
-            <Link
-              href={`/category/${post.category.slug}`}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full hover:text-white transition-colors"
-              style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-            >
-              <Tag size={12} />
-              {post.category.name}
-            </Link>
-            <span className="flex items-center gap-1.5">
-              <Eye size={14} /> {post.views.toLocaleString()} views
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Calendar size={14} /> {formatDate(date)}
-            </span>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            <button
-              onClick={handleVisit}
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white text-base transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: '#E50935' }}
-            >
-              <ExternalLink size={18} />
-              {loading ? 'Loading...' : 'Visit Content'}
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-gray-300 hover:text-white transition-colors"
-              style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-            >
-              <Share2 size={16} /> Share
-            </button>
-            <button
-              onClick={() => setReportOpen(true)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-gray-500 hover:text-white transition-colors"
-              style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-            >
-              <Flag size={16} /> Report
-            </button>
-          </div>
-
-          {/* Description */}
-          {post.description && (
-            <div
-              className="rounded-xl p-5 mb-6"
-              style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-            >
-              <h2 className="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wide">Description</h2>
-              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{post.description}</p>
-            </div>
-          )}
-
-          {/* Tags */}
-          {post.tags.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map(({ tag }) => (
-                  <Link
-                    key={tag.id}
-                    href={`/search?q=${encodeURIComponent(tag.name)}`}
-                    className="px-3 py-1 rounded-lg text-xs text-gray-400 hover:text-white transition-colors"
-                    style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-                  >
-                    #{tag.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#999', marginBottom: 24, flexWrap: 'wrap' }}>
+          <Link href="/" style={{ color: '#e50935' }}>Home</Link>
+          <span>›</span>
+          <Link href={`/category/${post.category.slug}`} style={{ color: '#e50935' }}>{post.category.name}</Link>
+          <span>›</span>
+          <span style={{ color: '#666' }}>{post.title.substring(0, 50)}{post.title.length > 50 ? '...' : ''}</span>
         </div>
 
-        {/* Sidebar */}
-        <div>
-          <div
-            className="rounded-xl p-5 sticky top-24"
-            style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-          >
-            <h3 className="text-sm font-bold text-white mb-4">Post Details</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Category</span>
-                <Link href={`/category/${post.category.slug}`} className="text-white hover:opacity-80">
-                  {post.category.name}
-                </Link>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
+
+          {/* Main */}
+          <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+
+            {/* Thumbnail */}
+            <div style={{ position: 'relative', aspectRatio: '16/9', background: '#000' }}>
+              <img
+                src={post.thumbnailUrl}
+                alt={post.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={e => {
+                  (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%23f0f0f0' width='800' height='450'/%3E%3Ctext fill='%23999' font-family='sans-serif' font-size='20' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+                }}
+              />
+            </div>
+
+            <div style={{ padding: '24px 28px' }}>
+              {/* Category tag */}
+              <Link href={`/category/${post.category.slug}`}
+                style={{ display: 'inline-block', background: '#fff0f3', color: '#e50935', fontSize: 12, fontWeight: 700, padding: '4px 12px', borderRadius: 20, marginBottom: 12 }}>
+                {post.category.name}
+              </Link>
+
+              {/* Title */}
+              <h1 style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 900, color: '#1a1a2e', marginBottom: 16, lineHeight: 1.3 }}>
+                {post.title}
+              </h1>
+
+              {/* Meta */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, fontSize: 13, color: '#888', marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid #f0f0f0' }}>
+                <span>&#128065; {post.views.toLocaleString()} views</span>
+                <span>&#128197; {formatDate(date)}</span>
+                {post.isFeatured && <span style={{ color: '#e50935', fontWeight: 700 }}>&#11088; Featured</span>}
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Views</span>
-                <span className="text-white">{post.views.toLocaleString()}</span>
+
+              {/* BIG WATCH BUTTON */}
+              <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', borderRadius: 16, padding: '28px 24px', textAlign: 'center', marginBottom: 24 }}>
+                <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 16 }}>Click below to watch the full content</p>
+                <button
+                  onClick={handleVisit}
+                  disabled={loading}
+                  style={{ background: 'linear-gradient(135deg, #e50935 0%, #c4072d 100%)', color: '#fff', border: 'none', borderRadius: 50, padding: '16px 48px', fontSize: 20, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 24px rgba(229,9,53,0.4)', transition: 'all 0.2s', letterSpacing: 0.5, display: 'inline-flex', alignItems: 'center', gap: 12 }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(229,9,53,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(229,9,53,0.4)'; }}
+                >
+                  <span style={{ fontSize: 24 }}>&#9654;</span>
+                  {loading ? 'Loading...' : 'Watch Now'}
+                </button>
+                <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>Opens in a new tab</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Published</span>
-                <span className="text-white">{formatDate(date)}</span>
-              </div>
-              {post.isFeatured && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Featured</span>
-                  <span className="text-xs px-2 py-0.5 rounded font-bold" style={{ background: '#E50935', color: '#fff' }}>
-                    Yes
-                  </span>
+
+              {/* Description */}
+              {post.description && (
+                <div style={{ background: '#f8f9fa', borderRadius: 12, padding: 20, marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: '#666', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Description</h3>
+                  <p style={{ fontSize: 14, color: '#444', lineHeight: 1.7 }}>{post.description}</p>
                 </div>
               )}
-            </div>
 
-            <button
-              onClick={handleVisit}
-              disabled={loading}
-              className="mt-5 w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-              style={{ background: '#E50935' }}
-            >
-              <ExternalLink size={16} />
-              Visit Content
-            </button>
+              {/* Tags */}
+              {post.tags.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Tags</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {post.tags.map(({ tag }) => (
+                      <Link key={tag.id} href={`/search?q=${encodeURIComponent(tag.name)}`}
+                        style={{ padding: '5px 14px', borderRadius: 20, background: '#f0f0f0', color: '#555', fontSize: 13, fontWeight: 500, border: '1px solid #e0e0e0' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fff0f3'; e.currentTarget.style.color = '#e50935'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#f0f0f0'; e.currentTarget.style.color = '#555'; }}>
+                        #{tag.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 10, paddingTop: 16, borderTop: '1px solid #f0f0f0', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleVisit}
+                  disabled={loading}
+                  style={{ flex: 1, minWidth: 160, background: '#e50935', color: '#fff', border: 'none', borderRadius: 10, padding: '12px 20px', fontSize: 15, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  &#9654; {loading ? 'Loading...' : 'Watch Full Video'}
+                </button>
+                <button
+                  onClick={() => { if (navigator.share) navigator.share({ title: post.title, url: window.location.href }); else navigator.clipboard.writeText(window.location.href); }}
+                  style={{ padding: '12px 20px', borderRadius: 10, border: '1.5px solid #e0e0e0', background: '#fff', color: '#555', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  &#128279; Share
+                </button>
+                <button
+                  onClick={() => setReportOpen(true)}
+                  style={{ padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e0e0e0', background: '#fff', color: '#999', fontSize: 14, cursor: 'pointer' }}>
+                  &#9873; Report
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Related posts */}
+        {related.length > 0 && (
+          <div style={{ marginTop: 40 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{ width: 4, height: 24, background: '#e50935', borderRadius: 2 }} />
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1a1a2e' }}>Related Posts</h2>
+            </div>
+            <PostGrid posts={related} columns={3} />
+          </div>
+        )}
       </div>
 
-      {/* Related posts */}
-      {related.length > 0 && (
-        <div className="mt-12">
-          <SectionHeader title="Related Posts" icon={<Tag size={16} />} />
-          <PostGrid posts={related} columns={3} />
-        </div>
-      )}
-
-      {/* Report modal */}
       {reportOpen && <ReportModal postId={post.id} onClose={() => setReportOpen(false)} />}
     </div>
   );

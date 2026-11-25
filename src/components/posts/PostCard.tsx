@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Eye, Calendar, Tag } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface PostCardProps {
@@ -14,10 +13,7 @@ interface PostCardProps {
     isFeatured: boolean;
     publishedAt: Date | string | null;
     createdAt: Date | string;
-    category: {
-      name: string;
-      slug: string;
-    };
+    category: { name: string; slug: string };
   };
 }
 
@@ -25,57 +21,50 @@ export default function PostCard({ post }: PostCardProps) {
   const date = post.publishedAt || post.createdAt;
 
   return (
-    <Link
-      href={`/post/${post.slug}`}
-      className="group block rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-      style={{ background: '#17171D', border: '1px solid #2A2A35' }}
-    >
+    <Link href={`/post/${post.slug}`} style={{ display: 'block', textDecoration: 'none', borderRadius: 12, overflow: 'hidden', background: '#fff', border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}>
+
       {/* Thumbnail */}
-      <div className="relative aspect-video overflow-hidden bg-gray-900">
+      <div style={{ position: 'relative', aspectRatio: '16/9', background: '#f0f0f0', overflow: 'hidden' }}>
         {post.isFeatured && (
-          <span
-            className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-xs font-bold text-white"
-            style={{ background: '#E50935' }}
-          >
+          <span style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, background: '#e50935', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 4 }}>
             Featured
           </span>
         )}
         <img
           src={post.thumbnailUrl}
           alt={post.title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s' }}
           loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' viewBox='0 0 400 225'%3E%3Crect fill='%2317171D' width='400' height='225'/%3E%3Ctext fill='%23374151' font-family='sans-serif' font-size='16' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+          onError={e => {
+            (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23f0f0f0' width='400' height='225'/%3E%3Ctext fill='%23999' font-family='sans-serif' font-size='14' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* Play button overlay */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0)', transition: 'background 0.2s' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.3)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0)')}>
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(229,9,53,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
+            className="play-btn">
+            <span style={{ color: '#fff', fontSize: 18, marginLeft: 3 }}>&#9654;</span>
+          </div>
+        </div>
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <h3 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-400 transition-colors">
+      <div style={{ padding: '10px 12px 12px' }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: '#1a1a2e', lineHeight: 1.4, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {post.title}
         </h3>
-
-        <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-          <Link
-            href={`/category/${post.category.slug}`}
-            className="flex items-center gap-1 hover:text-red-400 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Tag size={11} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, fontWeight: 600, background: '#fff0f3', color: '#e50935', padding: '3px 8px', borderRadius: 20 }}>
             {post.category.name}
-          </Link>
-          <span className="flex items-center gap-1">
-            <Eye size={11} />
-            {post.views.toLocaleString()}
           </span>
-          <span className="flex items-center gap-1 ml-auto">
-            <Calendar size={11} />
-            {formatDistanceToNow(new Date(date))}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: '#999' }}>
+            <span>&#128065; {post.views.toLocaleString()}</span>
+            <span>{formatDistanceToNow(new Date(date))}</span>
+          </div>
         </div>
       </div>
     </Link>
