@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Eye, ExternalLink, Grid3X3, TrendingUp, Plus, Flag } from 'lucide-react';
 import { formatDate } from '@/lib/utils/date';
 
 interface Post {
@@ -29,114 +28,110 @@ interface Props {
   mostViewed: Post[];
 }
 
-export default function DashboardClient({ email, stats, recentPosts, mostViewed }: Props) {
-  const statCards = [
-    { label: 'Published Posts', value: stats.totalPublished.toLocaleString(), icon: FileText, color: '#10B981' },
-    { label: 'Draft Posts', value: stats.totalDrafts.toLocaleString(), icon: FileText, color: '#F59E0B' },
-    { label: 'Categories', value: stats.totalCategories.toLocaleString(), icon: Grid3X3, color: '#6366F1' },
-    { label: 'Total Views', value: stats.totalViews.toLocaleString(), icon: Eye, color: '#3B82F6' },
-    { label: 'Link Clicks', value: stats.totalClicks.toLocaleString(), icon: ExternalLink, color: '#E50935' },
-    { label: 'Pending Reports', value: stats.pendingReports.toLocaleString(), icon: Flag, color: '#F59E0B' },
-  ];
+const statCards = (stats: Props['stats']) => [
+  { label: 'Published Posts', value: stats.totalPublished, color: '#10b981', bg: '#ecfdf5', emoji: '✅' },
+  { label: 'Draft Posts', value: stats.totalDrafts, color: '#f59e0b', bg: '#fffbeb', emoji: '📋' },
+  { label: 'Categories', value: stats.totalCategories, color: '#6366f1', bg: '#eef2ff', emoji: '🗂️' },
+  { label: 'Total Views', value: stats.totalViews, color: '#3b82f6', bg: '#eff6ff', emoji: '👁️' },
+  { label: 'Link Clicks', value: stats.totalClicks, color: '#e50935', bg: '#fff0f3', emoji: '🔗' },
+  { label: 'Pending Reports', value: stats.pendingReports, color: '#f59e0b', bg: '#fffbeb', emoji: '🚩' },
+];
 
+export default function DashboardClient({ email, stats, recentPosts, mostViewed }: Props) {
   return (
-    <>
-      <div className="mb-6 flex items-center justify-between">
+    <div>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 className="text-2xl font-black text-white">Dashboard</h1>
-          <p className="text-gray-500 text-sm">Welcome back, {email}</p>
+          <h1 style={{ fontSize: 26, fontWeight: 900, color: '#1a1a2e', marginBottom: 4 }}>Dashboard</h1>
+          <p style={{ fontSize: 14, color: '#64748b' }}>Welcome back, <strong>{email}</strong></p>
         </div>
-        <Link
-          href="/admin/posts/new"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-          style={{ background: '#E50935' }}
-        >
-          <Plus size={16} /> New Post
+        <Link href="/admin/posts/new" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: '#e50935', color: '#fff', padding: '10px 20px',
+          borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none',
+          boxShadow: '0 4px 12px rgba(229,9,53,0.3)'
+        }}>
+          ➕ New Post
         </Link>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.label} className="rounded-xl p-4" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: `${stat.color}20` }}>
-                <Icon size={16} style={{ color: stat.color }} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
+        {statCards(stats).map(card => (
+          <div key={card.label} style={{
+            background: '#fff', borderRadius: 14, padding: '20px 18px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: card.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+                {card.emoji}
               </div>
-              <p className="text-xl font-black text-white">{stat.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
             </div>
-          );
-        })}
+            <div style={{ fontSize: 28, fontWeight: 900, color: '#1a1a2e', lineHeight: 1 }}>{card.value.toLocaleString()}</div>
+            <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{card.label}</div>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Tables row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+
         {/* Recent posts */}
-        <div className="rounded-xl p-5" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-white">Recent Posts</h2>
-            <Link href="/admin/posts" className="text-xs text-gray-500 hover:text-white">View all</Link>
+        <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid #f5f5f5' }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, color: '#1a1a2e' }}>Recent Posts</h2>
+            <Link href="/admin/posts" style={{ fontSize: 12, color: '#e50935', fontWeight: 600, textDecoration: 'none' }}>View all →</Link>
           </div>
-          <div className="space-y-3">
-            {recentPosts.map((post) => (
-              <div key={post.id} className="flex items-start gap-3">
-                <img
-                  src={post.thumbnailUrl}
-                  alt=""
-                  className="w-12 h-8 rounded object-cover flex-shrink-0"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="flex-1 min-w-0">
-                  <Link href={`/admin/posts/${post.id}`} className="text-sm text-white hover:text-red-400 line-clamp-1">
+          <div style={{ padding: '8px 0' }}>
+            {recentPosts.length === 0 ? (
+              <p style={{ padding: '20px', fontSize: 13, color: '#999', textAlign: 'center' }}>No posts yet</p>
+            ) : recentPosts.map(post => (
+              <div key={post.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: '1px solid #fafafa' }}>
+                <img src={post.thumbnailUrl} alt="" style={{ width: 52, height: 34, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#f0f0f0' }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Link href={`/admin/posts/${post.id}`} style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {post.title}
                   </Link>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-gray-600">{post.category.name}</span>
-                    <span className="text-xs px-1.5 py-0.5 rounded" style={{
-                      background: post.status === 'PUBLISHED' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                      color: post.status === 'PUBLISHED' ? '#10B981' : '#F59E0B',
-                    }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 3 }}>
+                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{post.category.name}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: post.status === 'PUBLISHED' ? '#ecfdf5' : '#fffbeb', color: post.status === 'PUBLISHED' ? '#10b981' : '#f59e0b' }}>
                       {post.status}
                     </span>
                   </div>
                 </div>
-                <span className="text-xs text-gray-600 flex-shrink-0">{formatDate(post.createdAt)}</span>
+                <span style={{ fontSize: 11, color: '#cbd5e1', flexShrink: 0 }}>{formatDate(post.createdAt)}</span>
               </div>
             ))}
-            {recentPosts.length === 0 && <p className="text-sm text-gray-600">No posts yet.</p>}
           </div>
         </div>
 
         {/* Most viewed */}
-        <div className="rounded-xl p-5" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-white flex items-center gap-2">
-              <TrendingUp size={16} style={{ color: '#E50935' }} /> Most Viewed
-            </h2>
+        <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 20px', borderBottom: '1px solid #f5f5f5' }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, color: '#1a1a2e' }}>📈 Most Viewed</h2>
           </div>
-          <div className="space-y-3">
-            {mostViewed.map((post, i) => (
-              <div key={post.id} className="flex items-center gap-3">
-                <span className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: i === 0 ? '#E50935' : '#2A2A35', color: '#fff' }}>
+          <div style={{ padding: '8px 0' }}>
+            {mostViewed.length === 0 ? (
+              <p style={{ padding: '20px', fontSize: 13, color: '#999', textAlign: 'center' }}>No data yet</p>
+            ) : mostViewed.map((post, i) => (
+              <div key={post.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: '1px solid #fafafa' }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: i === 0 ? '#e50935' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: i === 0 ? '#fff' : '#64748b', flexShrink: 0 }}>
                   {i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <Link href={`/post/${post.slug}`} target="_blank" className="text-sm text-white hover:text-red-400 line-clamp-1">
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Link href={`/post/${post.slug}`} target="_blank" style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {post.title}
                   </Link>
-                  <p className="text-xs text-gray-600">{post.category.name}</p>
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>{post.category.name}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                  <Eye size={11} /> {post.views.toLocaleString()}
-                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#3b82f6', flexShrink: 0 }}>👁 {post.views.toLocaleString()}</span>
               </div>
             ))}
-            {mostViewed.length === 0 && <p className="text-sm text-gray-600">No data yet.</p>}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

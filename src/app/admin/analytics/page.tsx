@@ -3,7 +3,6 @@ import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import Link from 'next/link';
-import { Eye, ExternalLink, TrendingUp, BarChart3 } from 'lucide-react';
 
 export default async function AdminAnalyticsPage() {
   const session = await getSession();
@@ -13,109 +12,64 @@ export default async function AdminAnalyticsPage() {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const [
-    totalViews,
-    totalClicks,
-    weeklyViews,
-    weeklyClicks,
-    monthlyViews,
-    topPosts,
-  ] = await Promise.all([
+  const [totalViews, totalClicks, weeklyViews, weeklyClicks, monthlyViews, topPosts] = await Promise.all([
     prisma.postView.count(),
     prisma.externalLinkClick.count(),
     prisma.postView.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.externalLinkClick.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.postView.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-    prisma.post.findMany({
-      where: { status: 'PUBLISHED' },
-      orderBy: { views: 'desc' },
-      take: 10,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        views: true,
-        clicks: true,
-        thumbnailUrl: true,
-        category: { select: { name: true } },
-      },
-    }),
+    prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { views: 'desc' }, take: 10, select: { id: true, title: true, slug: true, views: true, clicks: true, thumbnailUrl: true, category: { select: { name: true } } } }),
   ]);
 
   const stats = [
-    { label: 'Total Views', value: totalViews.toLocaleString(), icon: Eye, color: '#3B82F6', sub: 'All time' },
-    { label: 'Total Clicks', value: totalClicks.toLocaleString(), icon: ExternalLink, color: '#E50935', sub: 'All time' },
-    { label: '7-Day Views', value: weeklyViews.toLocaleString(), icon: TrendingUp, color: '#10B981', sub: 'Last 7 days' },
-    { label: '7-Day Clicks', value: weeklyClicks.toLocaleString(), icon: ExternalLink, color: '#F59E0B', sub: 'Last 7 days' },
-    { label: '30-Day Views', value: monthlyViews.toLocaleString(), icon: BarChart3, color: '#6366F1', sub: 'Last 30 days' },
+    { label: 'Total Views', value: totalViews, emoji: '👁️', color: '#3b82f6', bg: '#eff6ff' },
+    { label: 'Total Clicks', value: totalClicks, emoji: '🔗', color: '#e50935', bg: '#fff0f3' },
+    { label: '7-Day Views', value: weeklyViews, emoji: '📈', color: '#10b981', bg: '#ecfdf5' },
+    { label: '7-Day Clicks', value: weeklyClicks, emoji: '🖱️', color: '#f59e0b', bg: '#fffbeb' },
+    { label: '30-Day Views', value: monthlyViews, emoji: '📊', color: '#6366f1', bg: '#eef2ff' },
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B0B0F' }}>
+    <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
       <AdminSidebar />
-      <main className="md:ml-56 pt-14 md:pt-0 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black text-white">Analytics</h1>
-          <p className="text-gray-500 text-sm">Real-time statistics from the database</p>
-        </div>
+      <main style={{ marginLeft: 220, padding: '32px 28px' }} className="admin-main">
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1a1a2e', marginBottom: 24 }}>Analytics</h1>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="rounded-xl p-4" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: `${stat.color}20` }}>
-                  <Icon size={16} style={{ color: stat.color }} />
-                </div>
-                <p className="text-xl font-black text-white">{stat.value}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
-                <p className="text-xs text-gray-700">{stat.sub}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
+          {stats.map(s => (
+            <div key={s.label} style={{ background: '#fff', borderRadius: 14, padding: '20px 18px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>
+                {s.emoji}
               </div>
-            );
-          })}
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#1a1a2e', lineHeight: 1 }}>{s.value.toLocaleString()}</div>
+              <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{s.label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Top posts */}
-        <div className="rounded-xl p-5" style={{ background: '#17171D', border: '1px solid #2A2A35' }}>
-          <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-            <TrendingUp size={16} style={{ color: '#E50935' }} />
-            Top 10 Posts by Views
-          </h2>
+        <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 20px', borderBottom: '1px solid #f5f5f5' }}>
+            <h2 style={{ fontSize: 15, fontWeight: 800, color: '#1a1a2e' }}>📈 Top 10 Posts by Views</h2>
+          </div>
           {topPosts.length === 0 ? (
-            <p className="text-gray-500 text-sm">No data yet.</p>
+            <p style={{ padding: 20, color: '#999', fontSize: 14, textAlign: 'center' }}>No data yet</p>
           ) : (
-            <div className="space-y-3">
+            <div>
               {topPosts.map((post, i) => (
-                <div
-                  key={post.id}
-                  className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{ background: '#0B0B0F' }}
-                >
-                  <span
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                    style={{ background: i === 0 ? '#E50935' : '#2A2A35', color: '#fff' }}
-                  >
+                <div key={post.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid #fafafa' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: i === 0 ? '#e50935' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: i === 0 ? '#fff' : '#64748b', flexShrink: 0 }}>
                     {i + 1}
-                  </span>
-                  <img
-                    src={post.thumbnailUrl}
-                    alt=""
-                    className="w-14 h-9 rounded object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/post/${post.slug}`}
-                      target="_blank"
-                      className="text-sm text-white hover:text-red-400 transition-colors line-clamp-1"
-                    >
+                  </div>
+                  <img src={post.thumbnailUrl} alt="" style={{ width: 52, height: 34, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#f0f0f0' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Link href={`/post/${post.slug}`} target="_blank" style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {post.title}
                     </Link>
-                    <p className="text-xs text-gray-600">{post.category.name}</p>
+                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{post.category.name}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500 flex-shrink-0">
-                    <span className="flex items-center gap-1"><Eye size={11} /> {post.views.toLocaleString()}</span>
-                    <span className="flex items-center gap-1"><ExternalLink size={11} /> {post.clicks.toLocaleString()}</span>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 12, flexShrink: 0 }}>
+                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>👁 {post.views.toLocaleString()}</span>
+                    <span style={{ color: '#e50935', fontWeight: 600 }}>🔗 {post.clicks.toLocaleString()}</span>
                   </div>
                 </div>
               ))}
@@ -123,6 +77,7 @@ export default async function AdminAnalyticsPage() {
           )}
         </div>
       </main>
+      <style>{`@media (max-width: 768px) { .admin-main { margin-left: 0 !important; padding-top: 72px !important; } }`}</style>
     </div>
   );
 }

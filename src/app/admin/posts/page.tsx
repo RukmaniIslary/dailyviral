@@ -18,39 +18,22 @@ export default async function AdminPostsPage({ searchParams }: Props) {
 
   const where = {
     ...(status ? { status: status as 'DRAFT' | 'PUBLISHED' } : {}),
-    ...(q
-      ? {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' as const } },
-          ],
-        }
-      : {}),
+    ...(q ? { OR: [{ title: { contains: q, mode: 'insensitive' as const } }] } : {}),
   };
 
   const [posts, total, categories] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      include: { category: { select: { name: true } } },
-    }),
+    prisma.post.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE, include: { category: { select: { name: true } } } }),
     prisma.post.count({ where }),
     prisma.category.findMany({ orderBy: { name: 'asc' } }),
   ]);
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B0B0F' }}>
+    <div style={{ background: '#f8f9fa', minHeight: '100vh' }}>
       <AdminSidebar />
-      <main className="md:ml-56 pt-14 md:pt-0 p-6">
-        <PostsTableClient
-          initialPosts={JSON.parse(JSON.stringify(posts))}
-          total={total}
-          page={page}
-          pageSize={PAGE_SIZE}
-          categories={categories}
-        />
+      <main style={{ marginLeft: 220, padding: '32px 28px' }} className="admin-main">
+        <PostsTableClient initialPosts={JSON.parse(JSON.stringify(posts))} total={total} page={page} pageSize={PAGE_SIZE} categories={categories} />
       </main>
+      <style>{`@media (max-width: 768px) { .admin-main { margin-left: 0 !important; padding-top: 72px !important; } }`}</style>
     </div>
   );
 }
