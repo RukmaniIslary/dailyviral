@@ -25,11 +25,11 @@ export default async function EditPostPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <div className="min-h-screen" style={{ background: '#0B0B0F' }}>
+    <div className="min-h-screen" style={{ background: '#f8f9fa' }}>
       <AdminSidebar />
       <main className="md:ml-56 pt-14 md:pt-0 p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-black text-white">Edit Post</h1>
+          <h1 className="text-2xl font-black" style={{ color: '#1a1a2e' }}>Edit Post</h1>
         </div>
         <PostForm
           categories={categories}
