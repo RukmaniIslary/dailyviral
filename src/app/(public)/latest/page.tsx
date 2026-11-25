@@ -1,61 +1,41 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { prisma } from '@/lib/db/prisma';
 import PostGrid from '@/components/posts/PostGrid';
-import Pagination from '@/components/ui/Pagination';
-import { Clock } from 'lucide-react';
 
 const PAGE_SIZE = 24;
+export const metadata: Metadata = { title: 'Latest Posts – Daily Viral MMS' };
 
-export const metadata: Metadata = {
-  title: 'Latest Posts – Daily Viral MMS',
-};
-
-interface Props {
-  searchParams: Promise<{ page?: string; featured?: string }>;
-}
+interface Props { searchParams: Promise<{ page?: string; featured?: string }>; }
 
 export default async function LatestPage({ searchParams }: Props) {
-  const { page: pageParam, featured: featuredParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam || '1'));
-  const featured = featuredParam === 'true';
-
-  const where = {
-    status: 'PUBLISHED' as const,
-    ...(featured ? { isFeatured: true } : {}),
-  };
+  const { page: p, featured: f } = await searchParams;
+  const page = Math.max(1, parseInt(p || '1'));
+  const featured = f === 'true';
+  const where = { status: 'PUBLISHED' as const, ...(featured ? { isFeatured: true } : {}) };
 
   const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      orderBy: { publishedAt: 'desc' },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      include: { category: { select: { name: true, slug: true } } },
-    }),
+    prisma.post.findMany({ where, orderBy: { publishedAt: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.count({ where }),
   ]);
-
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-8">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: 'rgba(229,9,53,0.1)' }}
-        >
-          <Clock size={20} style={{ color: '#E50935' }} />
+    <div style={{ background: '#f7f7f7', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111', marginBottom: 4 }}>{featured ? 'Featured Posts' : 'Latest Posts'}</h1>
+          <p style={{ fontSize: 14, color: '#999' }}>{total.toLocaleString()} posts</p>
         </div>
-        <div>
-          <h1 className="text-3xl font-black text-white">
-            {featured ? 'Featured Posts' : 'Latest Posts'}
-          </h1>
-          <p className="text-gray-500 text-sm">{total.toLocaleString()} posts</p>
-        </div>
+        <PostGrid posts={JSON.parse(JSON.stringify(posts))} columns={4} />
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
+            {page > 1 && <Link href={`/latest?page=${page - 1}`} style={{ padding: '9px 20px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 13, fontWeight: 600, color: '#555', background: '#fff' }}>Previous</Link>}
+            <span style={{ padding: '9px 16px', fontSize: 13, color: '#999' }}>Page {page} of {totalPages}</span>
+            {page < totalPages && <Link href={`/latest?page=${page + 1}`} style={{ padding: '9px 20px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 13, fontWeight: 600, color: '#555', background: '#fff' }}>Next</Link>}
+          </div>
+        )}
       </div>
-
-      <PostGrid posts={JSON.parse(JSON.stringify(posts))} columns={4} />
-      <Pagination currentPage={page} totalPages={totalPages} />
     </div>
   );
 }
