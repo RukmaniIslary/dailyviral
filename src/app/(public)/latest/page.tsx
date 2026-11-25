@@ -1,0 +1,61 @@
+import type { Metadata } from 'next';
+import { prisma } from '@/lib/db/prisma';
+import PostGrid from '@/components/posts/PostGrid';
+import Pagination from '@/components/ui/Pagination';
+import { Clock } from 'lucide-react';
+
+const PAGE_SIZE = 24;
+
+export const metadata: Metadata = {
+  title: 'Latest Posts – Daily Viral MMS',
+};
+
+interface Props {
+  searchParams: Promise<{ page?: string; featured?: string }>;
+}
+
+export default async function LatestPage({ searchParams }: Props) {
+  const { page: pageParam, featured: featuredParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam || '1'));
+  const featured = featuredParam === 'true';
+
+  const where = {
+    status: 'PUBLISHED' as const,
+    ...(featured ? { isFeatured: true } : {}),
+  };
+
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      orderBy: { publishedAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: { category: { select: { name: true, slug: true } } },
+    }),
+    prisma.post.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex items-center gap-3 mb-8">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(229,9,53,0.1)' }}
+        >
+          <Clock size={20} style={{ color: '#E50935' }} />
+        </div>
+        <div>
+          <h1 className="text-3xl font-black text-white">
+            {featured ? 'Featured Posts' : 'Latest Posts'}
+          </h1>
+          <p className="text-gray-500 text-sm">{total.toLocaleString()} posts</p>
+        </div>
+      </div>
+
+      <PostGrid posts={JSON.parse(JSON.stringify(posts))} columns={4} />
+      <Pagination currentPage={page} totalPages={totalPages} />
+    </div>
+  );
+}

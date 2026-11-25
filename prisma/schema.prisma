@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String              @id @default(cuid())
+  email        String              @unique
+  passwordHash String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  activityLogs AdminActivityLog[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]
+
+  @@index([slug])
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name  String    @unique
+  slug  String    @unique
+  posts PostTag[]
+
+  @@index([slug])
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String?
+  thumbnailUrl String
+  externalUrl String
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id])
+  views       Int        @default(0)
+  clicks      Int        @default(0)
+  isFeatured  Boolean    @default(false)
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  tags        PostTag[]
+  postViews   PostView[]
+  linkClicks  ExternalLinkClick[]
+  reports     Report[]
+
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([views])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  postId      String
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  @@index([status])
+  @@index([postId])
+}
+
+enum ReportReason {
+  ILLEGAL_CONTENT
+  MINOR_INVOLVED
+  NON_CONSENSUAL
+  COPYRIGHT
+  SPAM
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+model PostView {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model ExternalLinkClick {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model AdminActivityLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId, createdAt])
+}
