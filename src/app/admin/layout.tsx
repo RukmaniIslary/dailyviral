@@ -9,7 +9,7 @@ export default async function AdminLayout({
 }) {
   // Don't apply layout to login page
   return (
-    <div style={{ background: '#0B0B0F', minHeight: '100vh' }}>
+    <div style={{ background: '#f4f5f7', minHeight: '100vh' }}>
       {children}
     </div>
   );
