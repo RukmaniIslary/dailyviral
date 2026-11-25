@@ -53,7 +53,7 @@ export default function HeroStripes({ posts }: { posts: Post[] }) {
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column', gap: 4,
         overflow: 'hidden', pointerEvents: 'none',
-        opacity: 0.2,
+        opacity: 0.55,
       }}>
         {row(r1, 'left',  30)}
         {row(r2, 'right', 25)}

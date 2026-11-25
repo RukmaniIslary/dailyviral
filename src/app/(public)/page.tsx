@@ -33,10 +33,13 @@ export default async function HomePage() {
     <div style={{ background: '#f7f7f7', minHeight: '100vh' }}>
 
       {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, #0d0d1a 0%, #001f3f 60%, #003366 100%)', padding: '80px 20px', overflow: 'hidden', position: 'relative', minHeight: 380 }}>
+      <div style={{ background: '#0a0a14', padding: '80px 20px', overflow: 'hidden', position: 'relative', minHeight: 380 }}>
 
         {/* Animated stripes background */}
         <HeroStripes posts={latest} />
+
+        {/* Light dark overlay so text stays readable */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,10,30,0.45)', zIndex: 1 }} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <span style={{ display: 'inline-block', background: 'rgba(0,175,240,0.15)', border: '1px solid rgba(0,175,240,0.4)', color: '#00aff0', fontSize: 12, fontWeight: 700, padding: '5px 18px', borderRadius: 25, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 }}>
