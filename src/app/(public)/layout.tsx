@@ -3,9 +3,9 @@ import Footer from '@/components/layout/Footer';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f7f7f7' }}>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main style={{ flex: 1 }}>{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer />
     </div>
   );

@@ -64,7 +64,7 @@ export default async function HomePage() {
         {/* Image mosaic row at bottom of hero */}
         {latest.length > 0 && (
           <div style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4, maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)' }}>
-            {latest.slice(0, 6).map((p, i) => (
+            {latest.slice(0, 6).map((p) => (
               <Link key={p.id} href={`/post/${p.slug}`} style={{ display: 'block', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '6px 6px 0 0' }}>
                 <img src={p.thumbnailUrl} alt={p.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }}
