@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { ShieldAlert } from 'lucide-react';
 
 export default function AgeGate({ children }: { children: React.ReactNode }) {
-  const [confirmed, setConfirmed] = useState<boolean | null>(null);
+  const [confirmed, setConfirmed] = useState(true); // default true to avoid flash
 
   useEffect(() => {
     const stored = localStorage.getItem('dvm_age_confirmed');
-    setConfirmed(stored === 'true');
+    if (stored !== 'true') {
+      setConfirmed(false);
+    }
   }, []);
 
   function handleConfirm() {
@@ -20,8 +22,6 @@ export default function AgeGate({ children }: { children: React.ReactNode }) {
     window.location.href = 'https://www.google.com';
   }
 
-  if (confirmed === null) return null; // avoid hydration mismatch
-
   if (!confirmed) {
     return (
       <div
@@ -29,8 +29,8 @@ export default function AgeGate({ children }: { children: React.ReactNode }) {
         style={{ background: '#0B0B0F' }}
       >
         <div
-          className="max-w-md w-full rounded-2xl border p-8 text-center"
-          style={{ background: '#17171D', borderColor: '#2A2A35' }}
+          className="max-w-md w-full rounded-2xl p-8 text-center"
+          style={{ background: '#17171D', border: '1px solid #2A2A35' }}
         >
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
