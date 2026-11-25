@@ -22,9 +22,7 @@ export default function Footer() {
           <div>
             <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#e50935', marginBottom: 14 }}>Browse</h4>
             {[{ label: 'Home', href: '/' }, { label: 'Trending', href: '/trending' }, { label: 'Latest', href: '/latest' }].map(item => (
-              <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: 14, color: '#bbb', marginBottom: 8 }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#bbb')}>
+              <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: 14, color: '#bbb', marginBottom: 8 }}>
                 {item.label}
               </Link>
             ))}
@@ -39,9 +37,7 @@ export default function Footer() {
               { label: 'Contact Us', href: '/contact' },
               { label: 'About', href: '/about' },
             ].map(item => (
-              <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: 14, color: '#bbb', marginBottom: 8 }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#bbb')}>
+              <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: 14, color: '#bbb', marginBottom: 8 }}>
                 {item.label}
               </Link>
             ))}

@@ -47,9 +47,7 @@ function SectionTitle({ title, href }: { title: string; href?: string }) {
         <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1a1a2e' }}>{title}</h2>
       </div>
       {href && (
-        <Link href={href} style={{ fontSize: 13, fontWeight: 700, color: '#e50935', padding: '6px 16px', border: '1.5px solid #e50935', borderRadius: 20, transition: 'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#e50935'; e.currentTarget.style.color = '#fff'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#e50935'; }}>
+        <Link href={href} style={{ fontSize: 13, fontWeight: 700, color: '#e50935', padding: '6px 16px', border: '1.5px solid #e50935', borderRadius: 20 }}>
           View All
         </Link>
       )}
@@ -75,9 +73,7 @@ export default async function HomePage() {
             Discover the hottest trending viral content. Updated daily with the latest MMS and media.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/trending" style={{ background: '#e50935', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, display: 'inline-block', transition: 'opacity 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+            <Link href="/trending" style={{ background: '#e50935', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, display: 'inline-block' }}>
               &#128293; View Trending
             </Link>
             <Link href="/latest" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '12px 28px', borderRadius: 28, fontWeight: 700, fontSize: 15, border: '1.5px solid rgba(255,255,255,0.2)', display: 'inline-block' }}>
@@ -96,9 +92,7 @@ export default async function HomePage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {categories.map(cat => (
                 <Link key={cat.id} href={`/category/${cat.slug}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 24, background: '#fff', border: '1.5px solid #eee', fontSize: 14, fontWeight: 600, color: '#1a1a2e', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#e50935'; e.currentTarget.style.color = '#e50935'; e.currentTarget.style.background = '#fff0f3'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#eee'; e.currentTarget.style.color = '#1a1a2e'; e.currentTarget.style.background = '#fff'; }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 24, background: '#fff', border: '1.5px solid #eee', fontSize: 14, fontWeight: 600, color: '#1a1a2e', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
                   {cat.name}
                   <span style={{ background: '#e50935', color: '#fff', fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 12 }}>
                     {cat._count.posts}
