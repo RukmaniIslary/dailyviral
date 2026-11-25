@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ background: '#0B0B0F', color: '#fff', minHeight: '100vh' }}>
+      <body style={{ background: '#f7f7f7', color: '#111', minHeight: '100vh' }}>
         <AgeGate>{children}</AgeGate>
       </body>
     </html>

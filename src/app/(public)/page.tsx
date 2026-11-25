@@ -67,9 +67,7 @@ export default async function HomePage() {
             {latest.slice(0, 6).map((p) => (
               <Link key={p.id} href={`/post/${p.slug}`} style={{ display: 'block', aspectRatio: '3/4', overflow: 'hidden', borderRadius: '6px 6px 0 0' }}>
                 <img src={p.thumbnailUrl} alt={p.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }}
-                  onMouseOver={e => (e.currentTarget.style.transform = 'scale(1.05)')}
-                  onMouseOut={e => (e.currentTarget.style.transform = 'scale(1)')} />
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </Link>
             ))}
           </div>
