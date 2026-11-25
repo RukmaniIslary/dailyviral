@@ -27,15 +27,14 @@ export default async function EditPostPage({ params }: Props) {
   return (
     <div className="min-h-screen" style={{ background: '#f8f9fa' }}>
       <AdminSidebar />
-      <main className="md:ml-56 pt-14 md:pt-0 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black" style={{ color: '#1a1a2e' }}>Edit Post</h1>
-        </div>
+      <main style={{ marginLeft: 220, padding: '32px 28px' }} className="admin-main">
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1a1a2e', marginBottom: 24 }}>Edit Post</h1>
         <PostForm
           categories={categories}
           post={JSON.parse(JSON.stringify(post))}
         />
       </main>
+      <style>{`@media (max-width: 768px) { .admin-main { margin-left: 0 !important; padding-top: 72px !important; } }`}</style>
     </div>
   );
 }
