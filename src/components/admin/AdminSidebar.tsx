@@ -9,6 +9,7 @@ const navItems = [
   { label: 'All Posts', href: '/admin/posts' },
   { label: 'Add New Post', href: '/admin/posts/new' },
   { label: 'Categories', href: '/admin/categories' },
+  { label: 'Forums', href: '/admin/forums' },
   { label: 'Reports', href: '/admin/reports' },
   { label: 'Analytics', href: '/admin/analytics' },
   { label: 'Settings', href: '/admin/settings' },

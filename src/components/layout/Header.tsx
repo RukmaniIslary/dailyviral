@@ -76,6 +76,7 @@ export default function Header() {
 
           <Link href="/trending" className="nav-link">Trending</Link>
           <Link href="/latest" className="nav-link">Latest</Link>
+          <Link href="/forums" className="nav-link">Forums</Link>
         </nav>
 
         {/* Search */}
@@ -107,7 +108,7 @@ export default function Header() {
             <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder="Search posts..."
               style={{ width: '100%', padding: '10px 16px', borderRadius: 25, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none' }} />
           </form>
-          {[{ label: 'Home', href: '/' }, { label: 'Trending', href: '/trending' }, { label: 'Latest', href: '/latest' }].map(item => (
+          {[{ label: 'Home', href: '/' }, { label: 'Trending', href: '/trending' }, { label: 'Latest', href: '/latest' }, { label: 'Forums', href: '/forums' }].map(item => (
             <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
               style={{ display: 'block', padding: '11px 4px', fontSize: 15, fontWeight: 600, color: '#333', borderBottom: '1px solid #f5f5f5' }}>
               {item.label}
