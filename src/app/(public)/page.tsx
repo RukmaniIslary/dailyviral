@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import PostGrid from '@/components/posts/PostGrid';
+import CategoryCards from '@/components/posts/CategoryCards';
 import HeroStripes from '@/components/ui/HeroStripes';
 import Link from 'next/link';
 
@@ -64,16 +65,7 @@ export default async function HomePage() {
         {categories.length > 0 && (
           <div style={{ marginBottom: 52 }}>
             <SectionHead title="Browse Categories" />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-              {categories.map(c => (
-                <Link key={c.id} href={`/category/${c.slug}`} className="cat-pill">
-                  {c.name}
-                  <span style={{ background: '#00aff0', color: '#fff', fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 25 }}>
-                    {c._count.posts}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            <CategoryCards categories={JSON.parse(JSON.stringify(categories))} />
           </div>
         )}
 
