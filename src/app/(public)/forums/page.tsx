@@ -72,9 +72,7 @@ export default async function ForumsPage() {
                     <Link href={`/forums/${forum.slug}`} style={{
                       fontSize: 15, fontWeight: 700, color: '#1a1a2e',
                       display: 'block', marginBottom: 3,
-                    }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#1a73e8')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#1a1a2e')}>
+                    }}>
                       {forum.name}
                     </Link>
                     {forum.description && (
