@@ -43,43 +43,6 @@ export default function PostForm({ categories, post }: { categories: Category[];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [metaFetching, setMetaFetching] = useState(false);
-  const [metaHint, setMetaHint] = useState('');
-
-  // Auto-fetch title + thumbnail when external URL is pasted
-  useEffect(() => {
-    if (!externalUrl) return;
-    let valid = false;
-    try { new URL(externalUrl); valid = externalUrl.startsWith('https://'); } catch {}
-    if (!valid) return;
-
-    const t = setTimeout(async () => {
-      setMetaFetching(true);
-      setMetaHint('');
-      try {
-        const res = await fetch('/api/admin/fetch-meta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: externalUrl }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          if (data.title && !title) {
-            setTitle(data.title);
-            setMetaHint('✓ Title auto-filled from URL');
-          }
-          if (data.thumbnail && !thumbnailUrl) {
-            setThumbnailUrl(data.thumbnail);
-            setMetaHint(h => h ? h + ' + thumbnail' : '✓ Thumbnail auto-filled from URL');
-          }
-          if (!data.title && !data.thumbnail) setMetaHint('No metadata found on this page');
-        }
-      } catch {}
-      setMetaFetching(false);
-    }, 900);
-    return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalUrl]);
 
   useEffect(() => {
     if (!slugManual && title) setSlug(generateSlug(title));
@@ -179,21 +142,11 @@ export default function PostForm({ categories, post }: { categories: Category[];
           {/* External URL */}
           <div style={{ background: '#fff', border: '1.5px solid #e8e8e8', borderRadius: 12, padding: 24 }}>
             <label style={labelStyle}>External Content URL <span style={{ color: '#e50935' }}>*</span></label>
-            <input type="url" value={externalUrl} onChange={e => { setExternalUrl(e.target.value); setMetaHint(''); }}
+            <input type="url" value={externalUrl} onChange={e => setExternalUrl(e.target.value)}
               placeholder="https://example.com/content"
               style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }}
               onFocus={e => (e.target.style.borderColor = '#00aff0')} onBlur={e => (e.target.style.borderColor = '#e0e0e0')} />
-            <div style={{ marginTop: 6, minHeight: 20 }}>
-              {metaFetching && (
-                <p style={{ fontSize: 12, color: '#00aff0', fontWeight: 600 }}>⏳ Fetching page metadata...</p>
-              )}
-              {!metaFetching && metaHint && (
-                <p style={{ fontSize: 12, color: metaHint.startsWith('✓') ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{metaHint}</p>
-              )}
-              {!metaFetching && !metaHint && (
-                <p style={{ fontSize: 12, color: '#aaa' }}>Must be HTTPS. Title &amp; thumbnail will auto-fill when you paste a URL.</p>
-              )}
-            </div>
+            <p style={{ fontSize: 12, color: '#aaa', marginTop: 6 }}>Must be HTTPS. Visitors will be sent to this URL when they click Watch Now.</p>
           </div>
 
           {/* Tags */}
