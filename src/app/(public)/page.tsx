@@ -8,24 +8,29 @@ export const revalidate = 60;
 export const dynamic = 'force-dynamic';
 
 async function getData() {
-  const [latest, trending, featured, mostViewed, categories, totalPosts] = await Promise.all([
+  const [latest, trending, featured, mostViewed, categories] = await Promise.all([
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { publishedAt: 'desc' }, take: 12, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { clicks: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED', isFeatured: true }, orderBy: { publishedAt: 'desc' }, take: 6, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { views: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
     prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }], include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } } }),
-    prisma.post.count({ where: { status: 'PUBLISHED' } }),
   ]);
 
-  // Fetch hero images spread across all posts (take every Nth post)
-  const heroSkip = totalPosts > 36 ? Math.floor(totalPosts / 36) : 0;
+  // Fetch up to 60 posts for hero - mixed random spread across all content
+  const totalPosts = await prisma.post.count({ where: { status: 'PUBLISHED' } });
+  const heroSkip = totalPosts > 60 ? Math.floor(Math.random() * (totalPosts - 60)) : 0;
   const heroPosts = await prisma.post.findMany({
     where: { status: 'PUBLISHED' },
-    orderBy: { views: 'desc' },
-    take: 36,
+    orderBy: { createdAt: 'asc' },
+    take: 60,
     skip: heroSkip,
     select: { thumbnailUrl: true },
   });
+  // Shuffle them
+  for (let i = heroPosts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [heroPosts[i], heroPosts[j]] = [heroPosts[j], heroPosts[i]];
+  }
 
   return { latest, trending, featured, mostViewed, categories, heroPosts };
 }
