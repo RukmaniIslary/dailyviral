@@ -33,11 +33,26 @@ export async function POST(req: NextRequest) {
     const ogImage = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)?.[1]
       || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i)?.[1];
 
-    const rawTitle = ogTitle || twitterTitle || pageTitle || '';
+    const rawTitle = ogTitle || twitterTitle || (pageTitle && pageTitle !== 'Loading...' ? pageTitle : '') || '';
+    // Skip obviously bad titles
+    const badTitles = ['loading...', 'loading', 'untitled', ''];
+    const cleanedRaw = badTitles.includes(rawTitle.toLowerCase().trim()) ? '' : rawTitle;
     // Clean up title — remove site name suffixes like " - SiteName" or " | SiteName"
-    const title = rawTitle.replace(/\s*[-|–]\s*[^-|–]{1,40}$/, '').trim();
+    const title = cleanedRaw.replace(/\s*[-|–]\s*[^-|–]{1,40}$/, '').trim();
 
-    return NextResponse.json({ title, thumbnail: ogImage || null });
+    // If no meta title found, try to extract something readable from the URL path
+    let urlHint = '';
+    if (!title) {
+      try {
+        const u = new URL(url);
+        const segments = u.pathname.split('/').filter(Boolean);
+        // Take the last meaningful path segment and humanize it
+        const last = segments[segments.length - 1] || '';
+        urlHint = last.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '').trim();
+      } catch {}
+    }
+
+    return NextResponse.json({ title: title || urlHint || null, thumbnail: ogImage || null });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch metadata' }, { status: 422 });
   }
