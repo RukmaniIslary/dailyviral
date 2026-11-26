@@ -8,14 +8,26 @@ export const revalidate = 60;
 export const dynamic = 'force-dynamic';
 
 async function getData() {
-  const [latest, trending, featured, mostViewed, categories] = await Promise.all([
+  const [latest, trending, featured, mostViewed, categories, totalPosts] = await Promise.all([
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { publishedAt: 'desc' }, take: 12, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { clicks: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED', isFeatured: true }, orderBy: { publishedAt: 'desc' }, take: 6, include: { category: { select: { name: true, slug: true } } } }),
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { views: 'desc' }, take: 8, include: { category: { select: { name: true, slug: true } } } }),
     prisma.category.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }], include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } } }),
+    prisma.post.count({ where: { status: 'PUBLISHED' } }),
   ]);
-  return { latest, trending, featured, mostViewed, categories };
+
+  // Fetch hero images spread across all posts (take every Nth post)
+  const heroSkip = totalPosts > 36 ? Math.floor(totalPosts / 36) : 0;
+  const heroPosts = await prisma.post.findMany({
+    where: { status: 'PUBLISHED' },
+    orderBy: { views: 'desc' },
+    take: 36,
+    skip: heroSkip,
+    select: { thumbnailUrl: true },
+  });
+
+  return { latest, trending, featured, mostViewed, categories, heroPosts };
 }
 
 function SectionHead({ title, href }: { title: string; href?: string }) {
@@ -28,7 +40,7 @@ function SectionHead({ title, href }: { title: string; href?: string }) {
 }
 
 export default async function HomePage() {
-  const { latest, trending, featured, mostViewed, categories } = await getData();
+  const { latest, trending, featured, mostViewed, categories, heroPosts } = await getData();
 
   return (
     <div style={{ background: '#f7f7f7', minHeight: '100vh' }}>
@@ -37,7 +49,7 @@ export default async function HomePage() {
       <div style={{ background: '#0a0a14', padding: '80px 20px', overflow: 'hidden', position: 'relative', minHeight: 380 }}>
 
         {/* Animated stripes background */}
-        <HeroStripes posts={latest} />
+        <HeroStripes posts={heroPosts} />
 
         {/* Light dark overlay so text stays readable */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,10,30,0.45)', zIndex: 1 }} />
