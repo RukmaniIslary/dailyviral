@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'All Posts', href: '/admin/posts' },
   { label: 'Add New Post', href: '/admin/posts/new' },
+  { label: 'Bulk Upload', href: '/admin/posts/bulk' },
   { label: 'Categories', href: '/admin/categories' },
   { label: 'Forums', href: '/admin/forums' },
   { label: 'Reports', href: '/admin/reports' },
